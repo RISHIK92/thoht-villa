@@ -46,7 +46,7 @@ export default function EastAmenities() {
                 className="text-5xl md:text-[8rem] font-bold text-gray-900"
                 style={{ fontFamily: "VOLACROME, sans-serif" }}
               >
-                4070
+                4055
               </span>
               <span className="text-xs md:text-md text-gray-500">SFT</span>
             </div>
