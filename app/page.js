@@ -4,6 +4,7 @@ import EastSection from "./components/EastSection";
 import WestSection from "./components/WestSection";
 import FloorPlanViewer from "./components/FloorPlanViewer";
 import WestFloorPlanViewer from "./components/WestFloorPlanViewer";
+import TeamSection from "./components/TeamSection";
 
 export default function Home() {
   return (
@@ -17,6 +18,8 @@ export default function Home() {
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <WestSection />
       <WestFloorPlanViewer />
+      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
+      <TeamSection />
     </div>
   );
 }

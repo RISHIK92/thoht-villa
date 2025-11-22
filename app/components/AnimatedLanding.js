@@ -31,7 +31,7 @@ export default function AnimatedLanding() {
 
       {/* Left panel */}
       <div
-        className="fixed z-50 overflow-hidden"
+        className="absolute z-50 overflow-hidden"
         style={{
           top: 0,
           left: phase === "navbar" ? "50%" : 0,
@@ -73,7 +73,7 @@ export default function AnimatedLanding() {
 
       {/* Right panel */}
       <div
-        className="fixed z-50 overflow-hidden"
+        className="absolute z-50 overflow-hidden"
         style={{
           top: 0,
           left: phase === "navbar" ? "50%" : "auto",
@@ -115,7 +115,7 @@ export default function AnimatedLanding() {
       </div>
 
       <div
-        className="fixed top-0 left-0 right-0 z-40 transition-all duration-500 bg-transparent"
+        className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 bg-transparent"
         style={{
           height: phase === "navbar" ? "70px" : "0px",
         }}

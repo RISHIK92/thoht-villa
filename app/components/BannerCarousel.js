@@ -82,14 +82,7 @@ export default function BannerCarousel() {
                   ? "translate-y-0 opacity-100"
                   : "translate-y-10 opacity-0"
               }`}
-            >
-              <p className="text-amber-400 tracking-[0.3em] text-sm md:text-base font-medium mb-4 uppercase">
-                {slide.subtitle}
-              </p>
-              <h2 className="text-3xl md:text-8xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-lg">
-                {slide.title}
-              </h2>
-            </div>
+            ></div>
           </div>
         </div>
       ))}

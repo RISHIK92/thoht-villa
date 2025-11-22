@@ -37,22 +37,12 @@ export default function WestFloorPlanViewer() {
 
         <div className="relative w-full h-full transition-all duration-500 ease-in-out transform">
           <div
-            className="w-full h-3/4 bg-contain bg-center bg-no-repeat transition-opacity duration-500"
+            className="w-full h-full bg-contain bg-center bg-no-repeat transition-opacity duration-500"
             style={{
               backgroundImage: `url(${floorPlanImages[activeTab]})`,
             }}
           />
         </div>
-      </div>
-
-      <div className="mt-12 text-center max-w-2xl">
-        <h3 className="text-2xl font-serif text-gray-900 mb-4">
-          {activeTab} Floor
-        </h3>
-        <p className="text-gray-500 font-light">
-          Experience the perfect balance of luxury and comfort. Each floor is
-          thoughtfully designed to maximize space and natural light.
-        </p>
       </div>
     </div>
   );
