@@ -7,6 +7,7 @@ import WestFloorPlanViewer from "./components/WestFloorPlanViewer";
 import WestAmenities from "./components/WestAmenities";
 import EastAmenities from "./components/EastAmenities";
 import TeamSection from "./components/TeamSection";
+import ContactSection from "./components/ContactSection";
 import MapSection from "./components/MapSection";
 
 export default function Home() {
@@ -29,6 +30,8 @@ export default function Home() {
       </div>
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <TeamSection />
+      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
+      <ContactSection />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <MapSection />
     </div>

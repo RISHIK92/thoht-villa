@@ -14,6 +14,19 @@ export default function AnimatedLanding() {
     };
   }, []);
 
+  // Disable scrolling during animation
+  useEffect(() => {
+    if (phase !== "navbar") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [phase]);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-white">
       {/* Center reveal image - starts showing during shrinking */}
@@ -50,24 +63,12 @@ export default function AnimatedLanding() {
         <div
           className="w-full h-full relative"
           style={{
-            backgroundImage: "url(/villa-left.png)",
+            backgroundImage: "url(/bg.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "left center",
           }}
         >
           <div className={`absolute inset-0 transition-all duration-500`} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1
-              className="text-white font-bold tracking-widest"
-              style={{
-                fontSize: phase === "navbar" ? "18px" : "48px",
-                textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-                transition: phase === "navbar" ? "none" : "all 0.5s",
-              }}
-            >
-              EXPLORE
-            </h1>
-          </div>
         </div>
       </div>
 
@@ -93,7 +94,7 @@ export default function AnimatedLanding() {
         <div
           className="w-full h-full relative"
           style={{
-            backgroundImage: "url(/villa-right.png)",
+            backgroundImage: "url(/bg.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "right center",
           }}
@@ -120,6 +121,37 @@ export default function AnimatedLanding() {
           height: phase === "navbar" ? "70px" : "0px",
         }}
       />
+
+      {/* Scroll Down Indicator */}
+      {phase === "navbar" && (
+        <div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center animate-bounce cursor-pointer"
+          onClick={() => {
+            window.scrollBy({
+              top: window.innerHeight,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="text-white text-sm tracking-widest mb-2 uppercase">
+            Scroll
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-6 h-6 text-white"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
