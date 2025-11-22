@@ -24,8 +24,7 @@ body {
 
 @font-face {
   font-family: "VOLACROME";
-  src: url("/fonts/VOLACROME.ttf") format("truetype"),
-    url("/fonts/VOLACROME.otf") format("opentype");
+  src: url("/fonts/VOLACROME.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;

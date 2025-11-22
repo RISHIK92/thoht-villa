@@ -38,7 +38,7 @@ export default function WestAmenities() {
               </span>
               <span className="text-xs md:text-md text-gray-500">SFT</span>
             </div>
-            <span className="text-md md:text-m text-gray-500 tracking-wider mt-2">
+            <span className="text-md md:text-md text-gray-500 tracking-wider mt-2">
               to
             </span>
             <div className="flex items-baseline gap-1">
@@ -48,7 +48,7 @@ export default function WestAmenities() {
               >
                 4070
               </span>
-              <span className="text-xs text-gray-500">SFT</span>
+              <span className="text-xs md:text-md text-gray-500">SFT</span>
             </div>
           </div>
         </div>
