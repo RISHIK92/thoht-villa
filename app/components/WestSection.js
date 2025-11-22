@@ -1,0 +1,54 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
+export default function WestSection() {
+  return (
+    <div className="w-full min-h-screen bg-white flex flex-col md:flex-row overflow-hidden">
+      {/* Left side - Immersive Image */}
+      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gray-100 animate-reveal-image z-20 origin-right"></div>
+        <div
+          className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"
+          style={{
+            backgroundImage: "url(/West_Day.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        {/* Decorative overlay */}
+        <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent pointer-events-none" />
+      </div>
+
+      {/* Right side - Editorial Content */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center p-12 md:p-24 relative z-10">
+        <div className="space-y-8 animate-fade-in-up">
+          <div className="flex items-center gap-4">
+            <div className="h-[1px] w-12 bg-amber-500"></div>
+            <span className="text-amber-600 tracking-[0.3em] text-sm font-medium uppercase">
+              The Sunset Collection
+            </span>
+          </div>
+
+          <h1 className="text-7xl md:text-9xl font-serif font-medium text-gray-900 leading-none tracking-tight">
+            WEST
+            <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal">
+              Wing
+            </span>
+          </h1>
+
+          <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light">
+            Unwind in the warm glow of the evening sun. The West Wing offers a
+            sanctuary of peace, where the day's end paints the sky in hues of
+            gold and violet, creating the perfect backdrop for relaxation.
+          </p>
+
+          <button className="group flex items-center gap-3 text-gray-900 font-medium tracking-widest uppercase text-sm hover:text-amber-600 transition-colors mt-8">
+            Discover Wing
+            <span className="w-8 h-[1px] bg-gray-900 group-hover:bg-amber-600 transition-all group-hover:w-12"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
