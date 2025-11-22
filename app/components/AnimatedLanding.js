@@ -111,14 +111,14 @@ export default function AnimatedLanding() {
         </div>
       )}
 
-      {/* Header/Navbar with left-white.png and right-white.png */}
+      {/* Header/Navbar with top-to-bottom gradient fade */}
       <div
         className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 flex items-center justify-center gap-8 px-8"
         style={{
           height: phase === "navbar" ? "90px" : "0px",
           opacity: phase === "navbar" ? 1 : 0,
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-          borderBottom: "1px solid transparent",
+          background:
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.3) 80%, transparent 100%)",
           borderImage:
             "linear-gradient(to right, transparent, rgba(212, 175, 55, 0.5), transparent) 1",
           backdropFilter: "blur(10px)",
