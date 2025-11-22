@@ -105,7 +105,7 @@ export default function AnimatedLanding() {
                 backgroundImage: "url(/right.png)",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
-                backgroundPosition: "right calc(50% - 45px)",
+                backgroundPosition: "right calc(50% - 48px)",
               }}
             />
           </div>
