@@ -14,14 +14,12 @@ export default function AnimatedLanding() {
     };
   }, []);
 
-  // Disable scrolling during animation
   useEffect(() => {
     if (phase !== "navbar") {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -29,7 +27,7 @@ export default function AnimatedLanding() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-white">
-      {/* Center reveal image - starts showing during shrinking */}
+      {/* Center reveal image */}
       <div
         className="absolute inset-0 z-0 transition-opacity duration-700"
         style={{
@@ -42,93 +40,98 @@ export default function AnimatedLanding() {
         <div className="absolute inset-0" />
       </div>
 
-      {/* Left panel */}
-      <div
-        className="absolute z-50 overflow-hidden"
-        style={{
-          top: 0,
-          left: phase === "navbar" ? "50%" : 0,
-          transform:
-            phase === "initial"
-              ? "none"
-              : phase === "opening"
-              ? "translateX(-100%)"
-              : "translateX(-210px)",
-          width: phase === "navbar" ? "200px" : "50%",
-          height: phase === "navbar" ? "70px" : "100%",
-          transition: phase === "navbar" ? "none" : "transform 2s ease-in-out",
-          borderRight: phase === "navbar" ? "none" : "2px solid #D4AF37",
-        }}
-      >
+      {/* Left panel - hidden when navbar phase */}
+      {phase !== "navbar" && (
         <div
-          className="w-full h-full relative"
+          className="absolute z-50 overflow-hidden"
           style={{
-            backgroundImage: "url(/bg.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "left center",
+            top: 0,
+            left: 0,
+            transform: phase === "initial" ? "none" : "translateX(-100%)",
+            width: "50%",
+            height: "100%",
+            transition: "transform 2s ease-in-out",
+            borderRight: "2px solid #D4AF37",
           }}
         >
-          <div className={`absolute inset-0 transition-all duration-500`} />
-          {/* Overlay left.png */}
           <div
-            className="absolute inset-0 z-10"
+            className="w-full h-full relative"
             style={{
-              backgroundImage: "url(/left.png)",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
+              backgroundImage: "url(/bg.png)",
+              backgroundSize: "cover",
               backgroundPosition: "left center",
             }}
-          />
+          >
+            <div className="absolute inset-0 transition-all duration-500" />
+            <div
+              className="absolute inset-0 z-10"
+              style={{
+                backgroundImage: "url(/left.png)",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "left center",
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Right panel */}
-      <div
-        className="absolute z-50 overflow-hidden"
-        style={{
-          top: 0,
-          left: phase === "navbar" ? "50%" : "auto",
-          right: phase === "navbar" ? "auto" : 0,
-          transform:
-            phase === "initial"
-              ? "none"
-              : phase === "opening"
-              ? "translateX(100%)"
-              : "translateX(10px)",
-          width: phase === "navbar" ? "200px" : "50%",
-          height: phase === "navbar" ? "70px" : "100%",
-          transition: phase === "navbar" ? "none" : "transform 2s ease-in-out",
-          borderLeft: phase === "navbar" ? "none" : "2px solid #D4AF37",
-        }}
-      >
+      {/* Right panel - hidden when navbar phase */}
+      {phase !== "navbar" && (
         <div
-          className="w-full h-full relative"
+          className="absolute z-50 overflow-hidden"
           style={{
-            backgroundImage: "url(/bg.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "right center",
+            top: 0,
+            right: 0,
+            transform: phase === "initial" ? "none" : "translateX(100%)",
+            width: "50%",
+            height: "100%",
+            transition: "transform 2s ease-in-out",
+            borderLeft: "2px solid #D4AF37",
           }}
         >
-          <div className={`absolute inset-0 transition-all duration-500`} />
-          {/* Overlay right.png */}
           <div
-            className="absolute inset-0 z-10"
+            className="w-full h-full relative"
             style={{
-              backgroundImage: "url(/right.png)",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
+              backgroundImage: "url(/bg.png)",
+              backgroundSize: "cover",
               backgroundPosition: "right center",
             }}
-          />
+          >
+            <div className="absolute inset-0 transition-all duration-500" />
+            <div
+              className="absolute inset-0 z-10"
+              style={{
+                backgroundImage: "url(/right.png)",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right calc(50% - 45px)",
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
+      {/* Header/Navbar with left-white.png and right-white.png */}
       <div
-        className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 bg-transparent"
+        className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 flex items-center justify-center gap-8 px-8"
         style={{
-          height: phase === "navbar" ? "70px" : "0px",
+          height: phase === "navbar" ? "90px" : "0px",
+          opacity: phase === "navbar" ? 1 : 0,
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
         }}
-      />
+      >
+        <img
+          src="/left-white.png"
+          alt="Left Logo"
+          className="h-16 w-auto object-contain"
+        />
+        <img
+          src="/right-white.png"
+          alt="Right Logo"
+          className="h-16 w-auto object-contain mb-3"
+        />
+      </div>
 
       {/* Scroll Down Indicator */}
       {phase === "navbar" && (

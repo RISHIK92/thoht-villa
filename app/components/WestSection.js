@@ -30,7 +30,7 @@ export default function WestSection() {
             </span>
           </div>
 
-          <h1 className="text-7xl md:text-9xl font-serif font-medium text-gray-900 leading-none tracking-tight">
+          <h1 className="text-7xl md:text-9xl font-sans font-bold text-gray-900 leading-none tracking-tight">
             WEST
             <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal">
               Wing
