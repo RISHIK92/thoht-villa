@@ -7,16 +7,16 @@ export default function EastAmenities() {
       icon: "/wifi.png",
     },
     {
-      title: "Branded Fittings",
-      icon: "/shower.png",
+      title: "Only The Best For You",
+      icon: "/medal.png",
     },
     {
       title: "Luxury Living",
       icon: "/sofa.png",
     },
     {
-      title: "Only The Best For You",
-      icon: "/medal.png",
+      title: "Branded Fittings",
+      icon: "/shower.png",
     },
   ];
 
@@ -31,7 +31,7 @@ export default function EastAmenities() {
             </span>
             <div className="flex items-baseline gap-1">
               <span
-                className="text-5xl md:text-[8rem] font-bold text-gray-900"
+                className="text-5xl md:text-[8rem] text-gray-900"
                 style={{ fontFamily: "VOLACROME, sans-serif" }}
               >
                 3525
@@ -43,7 +43,7 @@ export default function EastAmenities() {
             </span>
             <div className="flex items-baseline gap-1">
               <span
-                className="text-5xl md:text-[8rem] font-bold text-gray-900"
+                className="text-5xl md:text-[8rem] text-gray-900"
                 style={{ fontFamily: "VOLACROME, sans-serif" }}
               >
                 4055
@@ -53,7 +53,7 @@ export default function EastAmenities() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 md:gap-12">
+        <div className="grid grid-cols-2 gap-8 md:gap-12 mt-16">
           {amenities.map((amenity, index) => (
             <div
               key={index}
