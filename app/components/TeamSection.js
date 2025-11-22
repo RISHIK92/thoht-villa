@@ -3,24 +3,17 @@
 export default function TeamSection() {
   const teamMembers = [
     {
-      name: "Sarah Johnson",
-      role: "Lead Architect",
+      name: "Polina V S",
+      role: "Managing Partner",
+      company: "Sri Sitara Constructions",
       image: "/East_Day.jpg",
     },
     {
-      name: "Michael Chen",
-      role: "Interior Designer",
+      name: "Ar. Sri Polina",
+      role: "Lead Architect",
+      company: "ThōhT Design Studio",
+      website: "www.thoht.in",
       image: "/West_Day.jpg",
-    },
-    {
-      name: "Emma Rodriguez",
-      role: "Project Manager",
-      image: "/East_Night.jpg",
-    },
-    {
-      name: "David Kim",
-      role: "Senior Developer",
-      image: "/West_Night.jpg",
     },
   ];
 
@@ -46,7 +39,7 @@ export default function TeamSection() {
         </div>
 
         {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {teamMembers.map((member, index) => (
             <div
               key={index}
@@ -69,6 +62,12 @@ export default function TeamSection() {
                 <p className="text-amber-400 text-sm tracking-widest uppercase font-medium">
                   {member.role}
                 </p>
+                {member.company && (
+                  <p className="text-gray-300 text-xs mt-1">{member.company}</p>
+                )}
+                {member.website && (
+                  <p className="text-gray-300 text-xs mt-1">{member.website}</p>
+                )}
               </div>
             </div>
           ))}

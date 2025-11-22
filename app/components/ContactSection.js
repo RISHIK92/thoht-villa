@@ -44,10 +44,10 @@ export default function ContactSection() {
               </div>
               <h4 className="font-serif text-xl text-gray-900 mb-3">Email</h4>
               <a
-                href="mailto:info@example.com"
+                href="mailto:info@lakeviewhomes.co.in"
                 className="text-gray-600 hover:text-amber-600 transition-colors text-sm"
               >
-                info@example.com
+                info@lakeviewhomes.co.in
               </a>
             </div>
 
@@ -71,10 +71,10 @@ export default function ContactSection() {
               </div>
               <h4 className="font-serif text-xl text-gray-900 mb-3">Phone</h4>
               <a
-                href="tel:+911234567890"
+                href="tel:+919441363666"
                 className="text-gray-600 hover:text-amber-600 transition-colors text-sm"
               >
-                +91 12345 67890
+                +91 94413 63666
               </a>
             </div>
 
@@ -103,11 +103,11 @@ export default function ContactSection() {
               </div>
               <h4 className="font-serif text-xl text-gray-900 mb-3">Address</h4>
               <p className="text-gray-600 text-sm leading-relaxed">
-                123 Luxury Lane,
+                Beside Sri Venkateswara Swamy Temple,
                 <br />
-                Premium District,
+                Kolamuru Diwancheruvu Rd,
                 <br />
-                City, State 123456
+                Rayudu Pakalu, 533102
               </p>
             </div>
 
@@ -135,12 +135,12 @@ export default function ContactSection() {
                 Instagram
               </h4>
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/mvr.lakeview.homes"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-amber-600 transition-colors text-sm"
               >
-                @villa_official
+                @mvr.lakeview.homes
               </a>
             </div>
           </div>
