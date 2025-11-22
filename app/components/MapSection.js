@@ -17,7 +17,7 @@ export default function MapSection() {
             Location
           </h2>
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mt-6 font-light">
-            Visit us at our exclusive location in the heart of the city.
+            Visit us at our exclusive location.
           </p>
         </div>
 
