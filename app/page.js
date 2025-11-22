@@ -4,6 +4,8 @@ import EastSection from "./components/EastSection";
 import WestSection from "./components/WestSection";
 import FloorPlanViewer from "./components/FloorPlanViewer";
 import WestFloorPlanViewer from "./components/WestFloorPlanViewer";
+import WestAmenities from "./components/WestAmenities";
+import EastAmenities from "./components/EastAmenities";
 import TeamSection from "./components/TeamSection";
 
 export default function Home() {
@@ -14,10 +16,16 @@ export default function Home() {
       <BannerCarousel />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <EastSection />
-      <FloorPlanViewer />
+      <div className="flex w-full">
+        <EastAmenities />
+        <FloorPlanViewer />
+      </div>
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <WestSection />
-      <WestFloorPlanViewer />
+      <div className="flex w-full">
+        <WestFloorPlanViewer />
+        <WestAmenities />
+      </div>
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <TeamSection />
     </div>
