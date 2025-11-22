@@ -63,12 +63,22 @@ export default function AnimatedLanding() {
         <div
           className="w-full h-full relative"
           style={{
-            backgroundImage: "url(/bg.jpg)",
+            backgroundImage: "url(/bg.png)",
             backgroundSize: "cover",
             backgroundPosition: "left center",
           }}
         >
           <div className={`absolute inset-0 transition-all duration-500`} />
+          {/* Overlay left.png */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{
+              backgroundImage: "url(/left.png)",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "left center",
+            }}
+          />
         </div>
       </div>
 
@@ -94,24 +104,22 @@ export default function AnimatedLanding() {
         <div
           className="w-full h-full relative"
           style={{
-            backgroundImage: "url(/bg.jpg)",
+            backgroundImage: "url(/bg.png)",
             backgroundSize: "cover",
             backgroundPosition: "right center",
           }}
         >
           <div className={`absolute inset-0 transition-all duration-500`} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1
-              className="text-white font-bold tracking-widest"
-              style={{
-                fontSize: phase === "navbar" ? "18px" : "48px",
-                textShadow: "2px 2px 8px rgba(0,0,0,0.8)",
-                transition: phase === "navbar" ? "none" : "all 0.5s",
-              }}
-            >
-              DISCOVER
-            </h1>
-          </div>
+          {/* Overlay right.png */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{
+              backgroundImage: "url(/right.png)",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right center",
+            }}
+          />
         </div>
       </div>
 
