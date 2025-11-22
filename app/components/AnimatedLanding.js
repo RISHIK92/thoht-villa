@@ -100,12 +100,11 @@ export default function AnimatedLanding() {
           >
             <div className="absolute inset-0 transition-all duration-500" />
             <div
-              className="absolute inset-0 z-10"
+              className="absolute inset-0 z-10 bg-[position:right_48.6%] md:bg-[position:right_48.5%] lg:bg-[position:right_40%]"
               style={{
                 backgroundImage: "url(/right.png)",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
-                backgroundPosition: "right calc(50% - 48px)",
               }}
             />
           </div>
@@ -119,6 +118,11 @@ export default function AnimatedLanding() {
           height: phase === "navbar" ? "90px" : "0px",
           opacity: phase === "navbar" ? 1 : 0,
           backgroundColor: "rgba(0, 0, 0, 0.7)",
+          borderBottom: "1px solid transparent",
+          borderImage:
+            "linear-gradient(to right, transparent, rgba(212, 175, 55, 0.5), transparent) 1",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
         }}
       >
         <img
