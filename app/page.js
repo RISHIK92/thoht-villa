@@ -18,13 +18,13 @@ export default function Home() {
       <BannerCarousel />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <EastSection />
-      <div className="flex w-full">
+      <div className="flex flex-col md:flex-row w-full">
         <EastAmenities />
         <FloorPlanViewer />
       </div>
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <WestSection />
-      <div className="flex w-full">
+      <div className="flex flex-col md:flex-row w-full">
         <WestFloorPlanViewer />
         <WestAmenities />
       </div>
