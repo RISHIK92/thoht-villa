@@ -7,16 +7,16 @@ export default function WestAmenities() {
       icon: "/wifi.png",
     },
     {
-      title: "Only The Best For You",
-      icon: "/medal.png",
-    },
-    {
       title: "Luxury Living",
       icon: "/sofa.png",
     },
     {
       title: "Branded Fittings",
       icon: "/shower.png",
+    },
+    {
+      title: "Only The Best For You",
+      icon: "/medal.png",
     },
   ];
 
