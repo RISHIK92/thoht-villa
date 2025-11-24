@@ -3,17 +3,17 @@
 export default function TeamSection() {
   const teamMembers = [
     {
-      name: "Polina V S",
-      role: "Managing Partner",
-      company: "Sri Sitara Constructions",
-      image: "/East_Day.jpg",
-    },
-    {
       name: "Ar. Sri Polina",
       role: "Lead Architect",
       company: "ThōhT Design Studio",
       website: "www.thoht.in",
       image: "/West_Day.jpg",
+    },
+    {
+      name: "Polina V S",
+      role: "Managing Partner",
+      company: "Sri Sitara Constructions",
+      image: "/East_Day.jpg",
     },
     {
       name: "Er. D.S. Ramesh Varma",
@@ -79,7 +79,13 @@ export default function TeamSection() {
                   <p className="text-gray-500 text-xs mt-1">{member.company}</p>
                 )}
                 {member.website && (
-                  <p className="text-gray-500 text-xs mt-1">{member.website}</p>
+                  <a
+                    className="text-gray-500 text-xs mt-1"
+                    href={`https://${member.website}`}
+                    target="_blank"
+                  >
+                    {member.website}
+                  </a>
                 )}
                 {member.email && (
                   <p className="text-gray-500 text-xs mt-1">{member.email}</p>
