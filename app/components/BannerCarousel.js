@@ -55,7 +55,7 @@ export default function BannerCarousel() {
   };
 
   return (
-    <div className="relative mx-0 my-0 md:mx-12 md:my-12 h-screen overflow-hidden bg-white group md:rounded-xl">
+    <div className="relative mx-4 my-4 md:mx-12 md:my-12 h-[40vh] md:h-screen overflow-hidden bg-white group rounded-3xl md:rounded-[2.5rem] shadow-2xl">
       {slides.map((slide, index) => (
         <div
           key={slide.url}
