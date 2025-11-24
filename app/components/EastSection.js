@@ -23,12 +23,19 @@ export default function EastSection() {
           </h1>
 
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light">
-            Awaken to the gentle embrace of the morning sun. The East Residence
-            captures the essence of new beginnings, offering panoramic views of
+            Awaken to the gentle embrace of the morning sun. The East Residences
+            capture the essence of new beginnings, offering panoramic views of
             the horizon where light meets luxury.
           </p>
 
-          <button className="group flex items-center gap-3 text-gray-900 font-medium tracking-widest uppercase text-sm hover:text-amber-600 transition-colors mt-8">
+          <button
+            onClick={() => {
+              document
+                .getElementById("east-layout")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="group flex items-center gap-3 text-gray-900 font-medium tracking-widest uppercase text-sm hover:text-amber-600 transition-colors mt-8"
+          >
             Discover Residence
             <span className="w-8 h-[1px] bg-gray-900 group-hover:bg-amber-600 transition-all group-hover:w-12"></span>
           </button>

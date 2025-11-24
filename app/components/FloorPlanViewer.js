@@ -14,7 +14,10 @@ export default function FloorPlanViewer() {
   const [activeTab, setActiveTab] = useState("Ground");
 
   return (
-    <div className="w-full md:w-1/2 md:ml-auto bg-white py-4 md:py-12 px-4 md:px-12 flex flex-col items-center order-2 md:order-2">
+    <div
+      id="east-layout"
+      className="w-full md:w-1/2 md:ml-auto bg-white py-4 md:py-12 px-4 md:px-12 flex flex-col items-center order-2 md:order-2"
+    >
       {/* Tabs */}
       <div className="flex flex-nowrap md:flex-wrap justify-center gap-2 md:gap-8 mb-4 w-full md:w-2/3 max-w-2xl bg-white rounded-xl shadow-sm border border-gray-100 p-2">
         {tabs.map((tab) => (

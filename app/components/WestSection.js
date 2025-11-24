@@ -33,18 +33,26 @@ export default function WestSection() {
           <h1 className="text-7xl md:text-9xl font-sans font-bold text-gray-900 leading-none tracking-tight">
             WEST
             <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal">
-              Wing
+              Residence
             </span>
           </h1>
 
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light">
-            Unwind in the warm glow of the evening sun. The West Wing offers a
-            sanctuary of peace, where the day's end paints the sky in hues of
-            gold and violet, creating the perfect backdrop for relaxation.
+            Unwind in the warm glow of the evening sun. The West Residences
+            offers a sanctuary of peace, where the day's end paints the sky in
+            hues of gold and violet, creating the perfect backdrop for
+            relaxation.
           </p>
 
-          <button className="group flex items-center gap-3 text-gray-900 font-medium tracking-widest uppercase text-sm hover:text-amber-600 transition-colors mt-8">
-            Discover Wing
+          <button
+            onClick={() => {
+              document
+                .getElementById("west-layout")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="group flex items-center gap-3 text-gray-900 font-medium tracking-widest uppercase text-sm hover:text-amber-600 transition-colors mt-8"
+          >
+            Discover Residence
             <span className="w-8 h-[1px] bg-gray-900 group-hover:bg-amber-600 transition-all group-hover:w-12"></span>
           </button>
         </div>

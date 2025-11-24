@@ -21,7 +21,7 @@ export default function BannerCarousel() {
     },
     {
       url: "/West_Day.jpg",
-      title: "WEST WING",
+      title: "WEST Residences",
       subtitle: "Breathtaking Sunsets",
     },
     {
