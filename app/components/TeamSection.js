@@ -7,27 +7,23 @@ export default function TeamSection() {
       role: "Lead Architect",
       company: "ThōhT Design Studio",
       website: "www.thoht.in",
-      image: "/West_Day.jpg",
     },
     {
       name: "Polina V S",
       role: "Managing Partner",
       company: "Sri Sitara Constructions",
-      image: "/East_Day.jpg",
     },
     {
       name: "Er. D.S. Ramesh Varma",
       role: "Structural Consultant",
       company: "SRV Consultants",
       email: "srvconsultants.rjy@gmail.com",
-      image: "/East_Day.jpg",
     },
     {
       name: "Ar. Rahul Varma",
       role: "Project Manager",
       company: "SRV Consultants",
       email: "srvconsultants.rjy@gmail.com",
-      image: "/West_Day.jpg",
     },
   ];
 
@@ -52,45 +48,44 @@ export default function TeamSection() {
           </p>
         </div>
 
-        {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        {/* Team Image */}
+        <div className="mb-12">
+          <img
+            src="/logos-our-team.png"
+            alt="Our Team"
+            className="w-full h-auto object-contain"
+          />
+        </div>
+
+        {/* Team Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {teamMembers.map((member, index) => (
             <div
               key={index}
-              className="group relative bg-white transition-all duration-500 hover:shadow-xl"
+              className="text-center p-6 bg-white transition-all duration-500 hover:shadow-xl"
             >
-              {/* Image */}
-              <div className="relative h-80 overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${member.image})` }}
-                />
-              </div>
-
-              {/* Info */}
-              <div className="p-6 text-center">
-                <h3 className="text-xl font-sans font-medium mb-1 text-gray-900">
-                  {member.name}
-                </h3>
-                <p className="text-amber-600 text-sm tracking-widest uppercase font-medium mb-2">
-                  {member.role}
-                </p>
-                {member.company && (
-                  <p className="text-gray-500 text-xs mt-1">{member.company}</p>
-                )}
-                {member.website && (
-                  <a
-                    className="text-gray-500 text-xs mt-1"
-                    href={`https://${member.website}`}
-                    target="_blank"
-                  >
-                    {member.website}
-                  </a>
-                )}
-                {member.email && (
-                  <p className="text-gray-500 text-xs mt-1">{member.email}</p>
-                )}
-              </div>
+              <h3 className="text-xl font-sans font-medium mb-1 text-gray-900">
+                {member.name}
+              </h3>
+              <p className="text-amber-600 text-sm tracking-widest uppercase font-medium mb-2">
+                {member.role}
+              </p>
+              {member.company && (
+                <p className="text-gray-500 text-xs mt-1">{member.company}</p>
+              )}
+              {member.website && (
+                <a
+                  className="text-gray-500 text-xs mt-1 block hover:text-amber-600 transition-colors"
+                  href={`https://${member.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {member.website}
+                </a>
+              )}
+              {member.email && (
+                <p className="text-gray-500 text-xs mt-1">{member.email}</p>
+              )}
             </div>
           ))}
         </div>

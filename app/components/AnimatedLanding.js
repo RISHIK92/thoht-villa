@@ -247,7 +247,7 @@ export default function AnimatedLanding() {
           <img
             src="/center-logo.png"
             alt="Center Logo"
-            className="h-16 w-auto object-contain drop-shadow-[0_4px_12px_rgba(255,255,255,0.6)] relative z-10"
+            className="h-22 w-auto mt-3 object-contain drop-shadow-[0_4px_12px_rgba(255,255,255,0.6)] relative z-10"
           />
         </div>
 
