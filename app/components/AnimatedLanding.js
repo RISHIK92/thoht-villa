@@ -115,7 +115,7 @@ export default function AnimatedLanding() {
 
         {/* Header/Navbar with two logos (mobile) */}
         <div
-          className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 flex items-center justify-center gap-8 px-8 backdrop-blur-md"
+          className="absolute top-0 left-0 right-0 z-40 transition-all duration-500 flex items-center justify-center gap-8 px-8"
           style={{
             height: phase === "navbar" ? "90px" : "0px",
             opacity: phase === "navbar" ? 1 : 0,
@@ -123,7 +123,7 @@ export default function AnimatedLanding() {
               "linear-gradient(to right, transparent, rgba(212, 175, 55, 0.5), transparent) 1",
           }}
         >
-          <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b drop-shadow-[0_4px_12px_rgba(255,255,255,0.6) from-black/80 via-black/20 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b drop-shadow-[0_4px_12px_rgba(255,255,255,0.6) from-black/80 via-black/40 to-transparent" />
 
           <img
             src="/left-white.png"
