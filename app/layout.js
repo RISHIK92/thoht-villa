@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Lakeview Homes",
-  description: "Lakeview Homes",
+  description: "Lakeview Homes Rajahmundry",
 };
 
 export default function RootLayout({ children }) {

@@ -9,10 +9,12 @@ import EastAmenities from "./components/EastAmenities";
 import TeamSection from "./components/TeamSection";
 import ContactSection from "./components/ContactSection";
 import MapSection from "./components/MapSection";
+import RotatePrompt from "./components/RotatePrompt";
 
 export default function Home() {
   return (
     <div className="bg-white">
+      <RotatePrompt />
       <AnimatedLanding />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <BannerCarousel />
