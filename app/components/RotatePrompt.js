@@ -6,6 +6,13 @@ export default function RotatePrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    // Check if prompt has already been shown in this session
+    const hasShownPrompt = sessionStorage.getItem("rotatePromptShown");
+
+    if (hasShownPrompt) {
+      return; // Don't show again in this session
+    }
+
     const checkOrientation = () => {
       // Check if device is mobile (width < 768px) and in portrait mode
       const isMobile = window.innerWidth < 768;
@@ -14,7 +21,10 @@ export default function RotatePrompt() {
       if (isMobile && isPortrait) {
         setShowPrompt(true);
 
-        // Hide after 1 second
+        // Mark as shown in sessionStorage
+        sessionStorage.setItem("rotatePromptShown", "true");
+
+        // Hide after 2 seconds
         const timer = setTimeout(() => {
           setShowPrompt(false);
         }, 2000);
