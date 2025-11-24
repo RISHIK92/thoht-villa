@@ -13,7 +13,7 @@ export default function MapSection() {
             </span>
             <div className="h-[1px] w-12 bg-amber-500"></div>
           </div>
-          <h2 className="text-5xl md:text-7xl font-serif font-medium text-gray-900 leading-none tracking-tight">
+          <h2 className="text-5xl md:text-7xl font-sans font-medium text-gray-900 leading-none tracking-tight">
             Location
           </h2>
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mt-6 font-light">

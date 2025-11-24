@@ -29,7 +29,7 @@ export default function TeamSection() {
             </span>
             <div className="h-[1px] w-12 bg-amber-500"></div>
           </div>
-          <h2 className="text-5xl md:text-7xl font-serif font-medium text-gray-900 leading-none tracking-tight">
+          <h2 className="text-5xl md:text-7xl font-sans font-medium text-gray-900 leading-none tracking-tight">
             Our Team
           </h2>
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mt-6 font-light">
@@ -56,7 +56,7 @@ export default function TeamSection() {
 
               {/* Info */}
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
-                <h3 className="text-xl font-serif font-medium mb-1">
+                <h3 className="text-xl font-sans font-medium mb-1">
                   {member.name}
                 </h3>
                 <p className="text-amber-400 text-sm tracking-widest uppercase font-medium">

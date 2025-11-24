@@ -13,7 +13,7 @@ export default function ContactSection() {
             </span>
             <div className="h-[1px] w-12 bg-amber-500"></div>
           </div>
-          <h2 className="text-5xl md:text-7xl font-serif font-medium text-gray-900 leading-none tracking-tight">
+          <h2 className="text-5xl md:text-7xl font-sans font-medium text-gray-900 leading-none tracking-tight">
             Contact Us
           </h2>
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mt-6 font-light">
@@ -42,7 +42,7 @@ export default function ContactSection() {
                   />
                 </svg>
               </div>
-              <h4 className="font-serif text-xl text-gray-900 mb-3">Email</h4>
+              <h4 className="font-sans text-xl text-gray-900 mb-3">Email</h4>
               <a
                 href="mailto:info@lakeviewhomes.co.in"
                 className="text-gray-600 hover:text-amber-600 transition-colors text-sm"
@@ -69,7 +69,7 @@ export default function ContactSection() {
                   />
                 </svg>
               </div>
-              <h4 className="font-serif text-xl text-gray-900 mb-3">Phone</h4>
+              <h4 className="font-sans text-xl text-gray-900 mb-3">Phone</h4>
               <a
                 href="tel:+919441363666"
                 className="text-gray-600 hover:text-amber-600 transition-colors text-sm"
@@ -101,7 +101,7 @@ export default function ContactSection() {
                   />
                 </svg>
               </div>
-              <h4 className="font-serif text-xl text-gray-900 mb-3">Address</h4>
+              <h4 className="font-sans text-xl text-gray-900 mb-3">Address</h4>
               <p className="text-gray-600 text-sm leading-relaxed">
                 Beside Sri Venkateswara Swamy Temple,
                 <br />
@@ -131,7 +131,7 @@ export default function ContactSection() {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </div>
-              <h4 className="font-serif text-xl text-gray-900 mb-3">
+              <h4 className="font-sans text-xl text-gray-900 mb-3">
                 Instagram
               </h4>
               <a
