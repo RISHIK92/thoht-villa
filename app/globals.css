@@ -105,4 +105,8 @@ body {
   .east-special {
     padding-top: 2rem !important;
   }
+
+  .banner-carousel-custom {
+    height: 80vh !important;
+  }
 }
