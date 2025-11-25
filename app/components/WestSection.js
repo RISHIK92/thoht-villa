@@ -21,8 +21,8 @@ export default function WestSection() {
       </div>
 
       {/* Right side - Editorial Content */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center p-12 md:p-24 relative z-10">
-        <div className="space-y-8 animate-fade-in-up">
+      <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-24 relative z-10 west-special">
+        <div className="space-y-6 animate-fade-in-up">
           <div className="flex items-center gap-4">
             <div className="h-[1px] w-12 bg-amber-500"></div>
             <span className="text-amber-600 tracking-[0.3em] text-sm font-medium uppercase">
@@ -32,12 +32,12 @@ export default function WestSection() {
 
           <h1 className="text-7xl md:text-9xl font-sans font-bold text-gray-900 leading-none tracking-tight">
             WEST
-            <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal">
+            <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal residence">
               Residence
             </span>
           </h1>
 
-          <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light">
+          <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light desc">
             Unwind in the warm glow of the evening sun. The West Residences
             offers a sanctuary of peace, where the day's end paints the sky in
             hues of gold and violet, creating the perfect backdrop for

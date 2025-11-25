@@ -78,3 +78,26 @@ body {
 .animate-bounce {
   animation: bounce 2s infinite;
 }
+
+@media (min-width: 900px) and (max-width: 960px) and (min-height: 400px) and (max-height: 460px) {
+  .west-special h1,
+  .east-special h1 {
+    font-size: 4rem !important; /* ~text-6xl (md size) */
+  }
+
+  .west-special .residence,
+  .east-special .residence {
+    font-size: 1.3rem !important; /* smaller subtitle */
+  }
+
+  .west-special .desc,
+  .east-special .desc {
+    font-size: 0.9rem !important; /* smaller paragraph */
+    max-width: 80% !important;
+  }
+
+  .west-special .button {
+    font-size: 0.9rem !important; /* smaller paragraph */
+    max-width: 80% !important;
+  }
+}
