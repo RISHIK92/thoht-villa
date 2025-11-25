@@ -4,22 +4,7 @@ import { useEffect, useRef } from "react";
 
 export default function WestSection() {
   return (
-    <div className="w-full min-h-screen bg-white flex flex-col md:flex-row overflow-hidden">
-      {/* Left side - Immersive Image */}
-      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden">
-        <div className="absolute inset-0 bg-gray-100 animate-reveal-image z-20 origin-right"></div>
-        <div
-          className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"
-          style={{
-            backgroundImage: "url(/West_Day.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        {/* Decorative overlay */}
-        <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent pointer-events-none" />
-      </div>
-
+    <div className="w-full min-h-screen bg-white flex flex-col md:flex-row-reverse overflow-hidden">
       {/* Right side - Editorial Content */}
       <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-24 relative z-10 west-special">
         <div className="space-y-6 animate-fade-in-up">
@@ -56,6 +41,21 @@ export default function WestSection() {
             <span className="w-8 h-[1px] bg-gray-900 group-hover:bg-amber-600 transition-all group-hover:w-12"></span>
           </button>
         </div>
+      </div>
+
+      {/* Left side - Immersive Image */}
+      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gray-100 animate-reveal-image z-20 origin-right"></div>
+        <div
+          className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"
+          style={{
+            backgroundImage: "url(/West_Day.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        {/* Decorative overlay */}
+        <div className="absolute inset-0 bg-gradient-to-l from-white/20 to-transparent pointer-events-none" />
       </div>
     </div>
   );

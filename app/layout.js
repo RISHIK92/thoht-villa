@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Lakeview Homes",
   description: "Lakeview Homes Rajahmundry",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }) {

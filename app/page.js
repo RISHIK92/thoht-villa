@@ -9,12 +9,10 @@ import EastAmenities from "./components/EastAmenities";
 import TeamSection from "./components/TeamSection";
 import ContactSection from "./components/ContactSection";
 import MapSection from "./components/MapSection";
-import RotatePrompt from "./components/RotatePrompt";
 
 export default function Home() {
   return (
     <div className="bg-white">
-      <RotatePrompt />
       <AnimatedLanding />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <BannerCarousel />
@@ -36,6 +34,11 @@ export default function Home() {
       <ContactSection />
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50" />
       <MapSection />
+      <footer className="w-full py-6 bg-white text-center">
+        <p className="text-gray-500 text-sm">
+          &copy; {new Date().getFullYear()} Lakeview Homes. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }

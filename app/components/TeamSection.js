@@ -20,7 +20,7 @@ export default function TeamSection() {
       email: "srvconsultants.rjy@gmail.com",
     },
     {
-      name: "D.S. Kiran Varma",
+      name: "Er. D.S. Kiran Varma",
       role: "Project Manager",
       company: "SRV Consultants",
       email: "srvconsultants.rjy@gmail.com",
