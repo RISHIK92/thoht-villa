@@ -19,12 +19,12 @@ export default function TeamSection() {
       company: "SRV Consultants",
       email: "srvconsultants.rjy@gmail.com",
     },
-    // {
-    //   name: "Ar. Rahul Varma",
-    //   role: "Project Manager",
-    //   company: "SRV Consultants",
-    //   email: "srvconsultants.rjy@gmail.com",
-    // },
+    {
+      name: "D.S. Kiran Varma",
+      role: "Project Manager",
+      company: "SRV Consultants",
+      email: "srvconsultants.rjy@gmail.com",
+    },
   ];
 
   return (
@@ -58,11 +58,13 @@ export default function TeamSection() {
         </div>
 
         {/* Team Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {teamMembers.map((member, index) => (
             <div
               key={index}
-              className="text-center p-6 bg-white transition-all duration-500 hover:shadow-xl"
+              className={`text-center p-6 bg-white transition-all duration-500 hover:shadow-xl ${
+                member.name === "Polina V S" ? "order-first md:order-none" : ""
+              }`}
             >
               <h3 className="text-xl font-sans font-medium mb-1 text-gray-900">
                 {member.name}
