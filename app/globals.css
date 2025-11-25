@@ -106,7 +106,8 @@ body {
     padding-top: 2rem !important;
   }
 
-  .banner-carousel-custom {
-    height: 80vh !important;
+  .banner-carousel-custom,
+  .section-image-custom {
+    height: 100vh !important;
   }
 }

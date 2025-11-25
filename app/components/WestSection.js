@@ -44,7 +44,7 @@ export default function WestSection() {
       </div>
 
       {/* Left side - Immersive Image */}
-      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden">
+      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden section-image-custom">
         <div className="absolute inset-0 bg-gray-100 animate-reveal-image z-20 origin-right"></div>
         <div
           className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"

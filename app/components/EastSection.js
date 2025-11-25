@@ -43,7 +43,7 @@ export default function EastSection() {
       </div>
 
       {/* Right side - Immersive Image */}
-      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden">
+      <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden section-image-custom">
         <div className="absolute inset-0 animate-reveal-image z-20 origin-left"></div>
         <div
           className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"
