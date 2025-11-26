@@ -36,7 +36,8 @@ export default function Home() {
       <MapSection />
       <footer className="w-full py-6 bg-white text-center">
         <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Lakeview Homes. All rights reserved.
+          &copy; {new Date().getFullYear()} Sri Sithara Constructions. All
+          rights reserved.
         </p>
       </footer>
     </div>
