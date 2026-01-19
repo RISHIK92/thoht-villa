@@ -26,14 +26,30 @@ export const metadata = {
     "Gated Community Rajahmundry",
     "Triplex Villas",
     "Premium Villas",
+    "Lakeview Home Rajahmundry",
+    "MVR Lakeview",
+    "Sithara Constructions",
+    "MVR Constructions",
+    "Villas in Rajahmundry",
   ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     title: "Lakeview Homes | Luxury Villas in Rajahmundry",
     description:
       "Experience luxury living at Lakeview Homes. Premium triplex villas with modern amenities in a serene location.",
     url: "https://lakeviewhomes.co.in",
     siteName: "Lakeview Homes",
-    locale: "en_US",
+    locale: "en_IN",
     type: "website",
     images: [
       {
@@ -62,6 +78,10 @@ export default function RootLayout({ children }) {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
     name: "Lakeview Homes",
+    parentOrganization: {
+      "@type": "ConstructionCompany",
+      name: "Sri Sithara Constructions",
+    },
     image: "https://lakeviewhomes.co.in/Master_Layout_triplex.jpg",
     "@id": "https://lakeviewhomes.co.in",
     url: "https://lakeviewhomes.co.in",
