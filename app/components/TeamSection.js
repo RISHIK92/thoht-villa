@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function TeamSection() {
   const teamMembers = [
     {
@@ -49,11 +51,12 @@ export default function TeamSection() {
         </div>
 
         {/* Team Image */}
-        <div className="mb-12">
-          <img
+        <div className="mb-12 relative w-full h-[200px] md:h-[400px]">
+          <Image
             src="/logos-our-team.png"
             alt="Our Team"
-            className="w-full h-auto object-contain"
+            fill
+            className="object-contain"
           />
         </div>
 

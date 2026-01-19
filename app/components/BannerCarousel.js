@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function BannerCarousel() {
   const slides = [
@@ -65,11 +66,18 @@ export default function BannerCarousel() {
         >
           {/* Image with Ken Burns effect */}
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-transform duration-[10s] ease-out ${
+            className={`absolute inset-0 transition-transform duration-[10s] ease-out ${
               currentIndex === index ? "scale-110" : "scale-100"
             }`}
-            style={{ backgroundImage: `url(${slide.url})` }}
-          />
+          >
+            <Image
+              src={slide.url}
+              alt={slide.title}
+              fill
+              className="object-cover object-center"
+              priority={index === 0}
+            />
+          </div>
 
           {/* Gradient Overlay */}
           {/* <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" /> */}

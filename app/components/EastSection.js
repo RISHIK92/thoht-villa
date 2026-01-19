@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 
 export default function EastSection() {
   return (
@@ -15,12 +16,12 @@ export default function EastSection() {
             </span>
           </div>
 
-          <h1 className="text-7xl md:text-9xl font-sans font-bold text-gray-900 leading-none tracking-tight">
+          <h2 className="text-7xl md:text-9xl font-sans font-bold text-gray-900 leading-none tracking-tight">
             EAST
             <span className="block text-2xl md:text-3xl font-sans font-light text-gray-400 mt-2 tracking-normal residence">
               Residence
             </span>
-          </h1>
+          </h2>
 
           <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md font-light desc">
             Awaken to the gentle embrace of the morning sun. The East Residences
@@ -45,16 +46,16 @@ export default function EastSection() {
       {/* Right side - Immersive Image */}
       <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative overflow-hidden section-image-custom">
         <div className="absolute inset-0 animate-reveal-image z-20 origin-left"></div>
-        <div
-          className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out"
-          style={{
-            backgroundImage: "url(/East_Day.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+        <div className="absolute inset-0 transition-transform duration-[2s] hover:scale-105 ease-out">
+          <Image
+            src="/East_Day.jpg"
+            alt="East Residence Day View"
+            fill
+            className="object-cover object-center"
+          />
+        </div>
         {/* Decorative overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none z-10" />
       </div>
     </div>
   );

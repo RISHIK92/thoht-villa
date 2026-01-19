@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function AnimatedLanding() {
   const [phase, setPhase] = useState("initial");
@@ -27,6 +28,8 @@ export default function AnimatedLanding() {
 
   return (
     <>
+      <h1 className="sr-only">Lakeview Homes - Luxury Villas in Rajahmundry</h1>
+
       {/* Mobile version with gate animation */}
       <div className="md:hidden relative w-full h-screen overflow-hidden bg-white">
         {/* Center reveal image */}
@@ -34,12 +37,16 @@ export default function AnimatedLanding() {
           className="absolute inset-0 z-0 transition-opacity duration-700"
           style={{
             opacity: phase === "initial" ? 0 : phase === "shrinking" ? 0.6 : 1,
-            backgroundImage: "url(/Master_Layout_triplex.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
           }}
         >
-          <div className="absolute inset-0" />
+          <Image
+            src="/Master_Layout_triplex.jpg"
+            alt="Lakeview Homes Master Layout"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/10" />
         </div>
 
         {/* Left panel - hidden when navbar phase */}
@@ -56,24 +63,22 @@ export default function AnimatedLanding() {
               borderRight: "2px solid #D4AF37",
             }}
           >
-            <div
-              className="w-full h-full relative"
-              style={{
-                backgroundImage: "url(/bg.png)",
-                backgroundSize: "cover",
-                backgroundPosition: "left center",
-              }}
-            >
-              <div className="absolute inset-0 transition-all duration-500" />
-              <div
-                className="absolute inset-0 z-10"
-                style={{
-                  backgroundImage: "url(/left.png)",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "left center",
-                }}
+            <div className="w-full h-full relative">
+              <Image
+                src="/bg.png"
+                alt="Decorative Background"
+                fill
+                className="object-cover object-left-center"
               />
+              <div className="absolute inset-0 transition-all duration-500" />
+              <div className="absolute inset-0 z-10">
+                <Image
+                  src="/left.png"
+                  alt="Left Gate Design"
+                  fill
+                  className="object-contain object-left-center"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -92,23 +97,22 @@ export default function AnimatedLanding() {
               borderLeft: "2px solid #D4AF37",
             }}
           >
-            <div
-              className="w-full h-full relative"
-              style={{
-                backgroundImage: "url(/bg.png)",
-                backgroundSize: "cover",
-                backgroundPosition: "right center",
-              }}
-            >
-              <div className="absolute inset-0 transition-all duration-500" />
-              <div
-                className="absolute inset-0 z-10 bg-[position:right_48.6%]"
-                style={{
-                  backgroundImage: "url(/right.png)",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                }}
+            <div className="w-full h-full relative">
+              <Image
+                src="/bg.png"
+                alt="Decorative Background"
+                fill
+                className="object-cover object-right-center"
               />
+              <div className="absolute inset-0 transition-all duration-500" />
+              <div className="absolute inset-0 z-10 bg-[position:right_48.6%]">
+                <Image
+                  src="/right.png"
+                  alt="Right Gate Design"
+                  fill
+                  className="object-contain object-right-center"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -176,11 +180,15 @@ export default function AnimatedLanding() {
           className="absolute inset-0 z-0 transition-opacity duration-700"
           style={{
             opacity: phase === "initial" ? 0 : phase === "shrinking" ? 0.6 : 1,
-            backgroundImage: "url(/Master_Layout_triplex.jpg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
           }}
         >
+          <Image
+            src="/Master_Layout_triplex.jpg"
+            alt="Lakeview Homes Master Layout"
+            fill
+            className="object-cover object-center"
+            priority
+          />
           <div className="absolute inset-0" />
         </div>
 
@@ -198,14 +206,14 @@ export default function AnimatedLanding() {
               borderRight: "2px solid #D4AF37",
             }}
           >
-            <div
-              className="w-full h-full relative"
-              style={{
-                backgroundImage: "url(/left-logo.jpg)",
-                backgroundSize: "cover",
-                backgroundPosition: "left center",
-              }}
-            ></div>
+            <div className="w-full h-full relative">
+              <Image
+                src="/left-logo.jpg"
+                alt="Left Logo Panel"
+                fill
+                className="object-cover object-left-center"
+              />
+            </div>
           </div>
         )}
 
@@ -223,14 +231,14 @@ export default function AnimatedLanding() {
               borderLeft: "2px solid #D4AF37",
             }}
           >
-            <div
-              className="w-full h-full relative"
-              style={{
-                backgroundImage: "url(/right-logo.jpg)",
-                backgroundSize: "cover",
-                backgroundPosition: "right center",
-              }}
-            ></div>
+            <div className="w-full h-full relative">
+              <Image
+                src="/right-logo.jpg"
+                alt="Right Logo Panel"
+                fill
+                className="object-cover object-right-center"
+              />
+            </div>
           </div>
         )}
 

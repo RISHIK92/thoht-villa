@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function WestAmenities() {
   const amenities = [
     {
@@ -58,11 +60,12 @@ export default function WestAmenities() {
           key={index}
           className="flex flex-col items-center text-center group"
         >
-          <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-            <img
+          <div className="mb-4 transition-transform duration-300 group-hover:scale-110 relative w-12 h-12 md:w-14 md:h-14">
+            <Image
               src={amenity.icon}
               alt={amenity.title}
-              className="w-12 h-12 md:w-14 md:h-14 object-contain"
+              fill
+              className="object-contain"
             />
           </div>
           <h3 className="text-sm md:text-base font-bold text-gray-900 leading-tight px-2">

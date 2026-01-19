@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import ImageZoomModal from "./ImageZoomModal";
 
 export default function FloorPlanViewer() {
@@ -44,12 +45,14 @@ export default function FloorPlanViewer() {
           className="relative w-full h-full transition-all duration-500 ease-in-out transform cursor-pointer group"
           onClick={() => setIsModalOpen(true)}
         >
-          <div
-            className="w-full h-full bg-contain bg-center bg-no-repeat transition-opacity duration-500"
-            style={{
-              backgroundImage: `url(${floorPlanImages[activeTab]})`,
-            }}
-          />
+          <div className="w-full h-full relative">
+            <Image
+              src={floorPlanImages[activeTab]}
+              alt={`${activeTab} Floor Plan`}
+              fill
+              className="object-contain"
+            />
+          </div>
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-4">
