@@ -58,11 +58,55 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: "Lakeview Homes",
+    image: "https://lakeviewhomes.co.in/Master_Layout_triplex.jpg",
+    "@id": "https://lakeviewhomes.co.in",
+    url: "https://lakeviewhomes.co.in",
+    telephone: "+919441363666",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress:
+        "Beside Sri Venkateswara Swamy Temple, Kolamuru Diwancheruvu Rd, Rayudu Pakalu",
+      addressLocality: "Rajahmundry",
+      postalCode: "533102",
+      addressCountry: "IN",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 17.064056,
+      longitude: 81.835167,
+    },
+    description:
+      "Premium luxury triplex villas in Rajahmundry with world-class amenities and sunset views.",
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "09:00",
+      closes: "18:00",
+    },
+    sameAs: ["https://instagram.com/mvr.lakeview.homes"],
+  };
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {children}
       </body>
     </html>
