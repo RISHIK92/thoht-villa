@@ -61,8 +61,10 @@ export default function FlipBook({ images = [] }) {
     startScale: 1,
     startTx: 0,
     startTy: 0,
-    midX: 0,
+    midX: 0, // world midpoint at gesture start
     midY: 0,
+    lastMidX: 0, // for pan tracking
+    lastMidY: 0,
   });
   const wasPinchingRef = useRef(false);
   const total = images.length;
@@ -110,87 +112,131 @@ export default function FlipBook({ images = [] }) {
     return () => el?.removeEventListener("wheel", onWheel);
   }, []);
 
+  // Register capture-phase touch listeners so react-pageflip never sees 2-finger gestures
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const getMid = (touches) => {
+      const rect = el.getBoundingClientRect();
+      return {
+        x:
+          (touches[0].clientX + touches[1].clientX) / 2 -
+          rect.left -
+          rect.width / 2,
+        y:
+          (touches[0].clientY + touches[1].clientY) / 2 -
+          rect.top -
+          rect.height / 2,
+      };
+    };
+
+    const onStart = (e) => {
+      if (e.touches.length < 2) return;
+      e.stopPropagation();
+      e.preventDefault();
+      wasPinchingRef.current = true;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const mid = getMid(e.touches);
+      pinchRef.current = {
+        active: true,
+        startDist: Math.hypot(dx, dy),
+        startScale: 0, // filled from state snapshot below
+        startTx: 0,
+        startTy: 0,
+        midX: mid.x,
+        midY: mid.y,
+        lastMidX: mid.x,
+        lastMidY: mid.y,
+      };
+      // capture current zoom state into pinchRef
+      setZoom((z) => {
+        pinchRef.current.startScale = z.scale;
+        pinchRef.current.startTx = z.tx;
+        pinchRef.current.startTy = z.ty;
+        return z; // no change
+      });
+    };
+
+    const onMove = (e) => {
+      if (!pinchRef.current.active || e.touches.length < 2) return;
+      e.stopPropagation();
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const mid = getMid(e.touches);
+      const {
+        startDist,
+        startScale,
+        startTx,
+        startTy,
+        midX,
+        midY,
+        lastMidX,
+        lastMidY,
+      } = pinchRef.current;
+
+      const newScale = Math.min(
+        3,
+        Math.max(0.5, +(startScale * (dist / startDist)).toFixed(3)),
+      );
+      const scaleRatio = newScale / startScale;
+      // zoom toward the initial pinch midpoint + follow any pan between frames
+      const panDx = mid.x - lastMidX;
+      const panDy = mid.y - lastMidY;
+      pinchRef.current.lastMidX = mid.x;
+      pinchRef.current.lastMidY = mid.y;
+
+      setZoom({
+        scale: newScale,
+        tx: midX - (midX - startTx) * scaleRatio + panDx,
+        ty: midY - (midY - startTy) * scaleRatio + panDy,
+      });
+    };
+
+    const onEnd = (e) => {
+      if (e.touches.length < 2) {
+        pinchRef.current.active = false;
+      }
+      if (wasPinchingRef.current) {
+        e.stopPropagation();
+        // swallow the next click so react-pageflip can't flip
+        const blockClick = (ev) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+        el.addEventListener("click", blockClick, { capture: true, once: true });
+        setTimeout(() => {
+          wasPinchingRef.current = false;
+        }, 400);
+      }
+    };
+
+    el.addEventListener("touchstart", onStart, {
+      capture: true,
+      passive: false,
+    });
+    el.addEventListener("touchmove", onMove, { capture: true, passive: false });
+    el.addEventListener("touchend", onEnd, { capture: true, passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onStart, { capture: true });
+      el.removeEventListener("touchmove", onMove, { capture: true });
+      el.removeEventListener("touchend", onEnd, { capture: true });
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onFlip = (e) => setPage(e.data);
+  const onTouchStart = undefined;
+  const onTouchMove = undefined;
+  const onTouchEnd = undefined;
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       containerRef.current?.requestFullscreen();
     } else {
       document.exitFullscreen();
-    }
-  };
-
-  const onFlip = (e) => setPage(e.data);
-
-  const onTouchStart = (e) => {
-    if (e.touches.length === 2) {
-      wasPinchingRef.current = true;
-      const el = wrapRef.current;
-      const rect = el?.getBoundingClientRect();
-      const midX =
-        (e.touches[0].clientX + e.touches[1].clientX) / 2 -
-        (rect?.left ?? 0) -
-        (rect?.width ?? 0) / 2;
-      const midY =
-        (e.touches[0].clientY + e.touches[1].clientY) / 2 -
-        (rect?.top ?? 0) -
-        (rect?.height ?? 0) / 2;
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      pinchRef.current = {
-        active: true,
-        startDist: Math.hypot(dx, dy),
-        startScale: zoom.scale,
-        startTx: zoom.tx,
-        startTy: zoom.ty,
-        midX,
-        midY,
-      };
-      e.preventDefault();
-    }
-  };
-
-  const onTouchMove = (e) => {
-    if (pinchRef.current.active && e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      const ratio = dist / pinchRef.current.startDist;
-      const { startScale, startTx, startTy, midX, midY } = pinchRef.current;
-      const newScale = Math.min(
-        2.5,
-        Math.max(0.5, +(startScale * ratio).toFixed(2)),
-      );
-      const scaleRatio = newScale / startScale;
-      setZoom({
-        scale: newScale,
-        tx: midX - (midX - startTx) * scaleRatio,
-        ty: midY - (midY - startTy) * scaleRatio,
-      });
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-
-  const onTouchEnd = (e) => {
-    if (e.touches.length < 2) {
-      pinchRef.current.active = false;
-      if (wasPinchingRef.current) {
-        // block the imminent click/flip that react-pageflip fires on touch end
-        const block = (ev) => {
-          ev.stopPropagation();
-          ev.preventDefault();
-        };
-        wrapRef.current?.addEventListener("click", block, {
-          capture: true,
-          once: true,
-        });
-        wrapRef.current?.addEventListener("touchend", block, {
-          capture: true,
-          once: true,
-        });
-        setTimeout(() => {
-          wasPinchingRef.current = false;
-        }, 300);
-      }
     }
   };
 
@@ -338,9 +384,6 @@ export default function FlipBook({ images = [] }) {
       <div
         ref={wrapRef}
         className="fb-wrap"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
         style={{
           width: isMobile ? "96vw" : "78vw",
           height: isMobile ? "70vh" : "80vh",

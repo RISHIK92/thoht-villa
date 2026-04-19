@@ -8,7 +8,8 @@ export const metadata = {
 // ── Auto-generated from public/Lakeview Homes_WEBP (00–25) ─────────────────
 const BROCHURE_PAGES = Array.from(
   { length: 26 },
-  (_, i) => `/Lakeview Homes_WEBP/${String(i).padStart(2, "0")}.webp`,
+  (_, i) =>
+    `/Lakeview Homes_Compressed_WEBP/${String(i).padStart(2, "0")}.webp`,
 );
 
 export default function BrochurePage() {
