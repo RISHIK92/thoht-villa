@@ -62,8 +62,8 @@ export default function FlipBook({ images = [] }) {
    */
   const zoomRef      = useRef({ scale: 1, tx: 0, ty: 0 });
   const pinchRef     = useRef({ active: false });
-  const blockFlipRef = useRef(false);
   const isPinchingRef = useRef(false);   // true while ≥2 fingers are down
+  const dragRef       = useRef({ active: false, lastX: 0, lastY: 0 }); // 1-finger pan
 
   const total      = images.length;
   const pages      = [...images];
@@ -153,13 +153,30 @@ export default function FlipBook({ images = [] }) {
     const getDist = (t) =>
       Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
 
-    /* ── touchstart ───────────────────────────────────────────────────── */
+    /* ── touchstart ───────────────────────────────────────────────────── *
+     * ALL touch events are intercepted — react-pageflip never sees them.
+     * • 1 finger → pan the canvas (drag)
+     * • 2 fingers → pinch-zoom + pan
+     * ─────────────────────────────────────────────────────────────────── */
     const onStart = (e) => {
-      if (e.touches.length < 2) return;  // 1-finger → ignore
+      e.stopPropagation(); // always block react-pageflip
+      e.preventDefault();  // stop browser scroll/zoom in all cases
 
-      // Prevent browser native pinch-zoom AND page scroll during pinch
-      e.preventDefault();
-      e.stopPropagation();
+      if (e.touches.length === 1) {
+        // ── 1-finger: start canvas drag ──────────────────────────────────
+        dragRef.current = {
+          active: true,
+          lastX:  e.touches[0].clientX,
+          lastY:  e.touches[0].clientY,
+        };
+        // Cancel any in-progress pinch
+        isPinchingRef.current = false;
+        pinchRef.current.active = false;
+        return;
+      }
+
+      // ── 2-finger: pinch-zoom + pan ──────────────────────────────────────
+      dragRef.current.active = false; // cancel any drag
 
       const t    = e.touches;
       const mid  = getMid(t);
@@ -167,38 +184,48 @@ export default function FlipBook({ images = [] }) {
       const rect = el.getBoundingClientRect();
       const { scale, tx, ty } = zoomRef.current;
 
-      // Canvas-space anchor = screen mid → element-local, from element center
       const anchorX = mid.x - rect.left - rect.width  / 2;
       const anchorY = mid.y - rect.top  - rect.height / 2;
 
       pinchRef.current = {
-        active:      true,
-        startDist:   d,
-        startScale:  scale,
-        startTx:     tx,
-        startTy:     ty,
+        active:     true,
+        startDist:  d,
+        startScale: scale,
+        startTx:    tx,
+        startTy:    ty,
         anchorX,
         anchorY,
-        lastMidX:    mid.x,
-        lastMidY:    mid.y,
+        lastMidX:   mid.x,
+        lastMidY:   mid.y,
       };
-      isPinchingRef.current  = true;
-      blockFlipRef.current   = true;
+      isPinchingRef.current = true;
     };
 
     /* ── touchmove ────────────────────────────────────────────────────── */
     const onMove = (e) => {
+      e.stopPropagation(); // always block react-pageflip swipe
+      e.preventDefault();  // prevent page scroll / browser zoom
+
+      if (e.touches.length === 1 && dragRef.current.active) {
+        // ── 1-finger canvas pan ────────────────────────────────────────────
+        const dx = (e.touches[0].clientX - dragRef.current.lastX) * PAN_FACTOR;
+        const dy = (e.touches[0].clientY - dragRef.current.lastY) * PAN_FACTOR;
+        dragRef.current.lastX = e.touches[0].clientX;
+        dragRef.current.lastY = e.touches[0].clientY;
+        const { scale, tx, ty } = zoomRef.current;
+        applyZoom({ scale, tx: tx + dx, ty: ty + dy });
+        return;
+      }
+
       if (!isPinchingRef.current || e.touches.length < 2) return;
 
-      e.preventDefault();
-      e.stopPropagation();
-
+      // ── 2-finger pinch-zoom + pan ──────────────────────────────────────
       const t   = e.touches;
       const p   = pinchRef.current;
       const mid = getMid(t);
       const d   = getDist(t);
 
-      // ─ Scale (lerped) ────────────────────────────────────────────────
+      // Scale (lerped toward target for smooth, slow feel)
       const targetScale = p.startScale * (d / p.startDist);
       const prevScale   = zoomRef.current.scale;
       const newScale    = Math.min(4, Math.max(0.5,
@@ -206,42 +233,49 @@ export default function FlipBook({ images = [] }) {
       ));
       const scaleRatio  = newScale / p.startScale;
 
-      // ─ Pan delta (damped) ────────────────────────────────────────────
+      // Pan delta (damped — feels slow and controlled)
       const panDx = (mid.x - p.lastMidX) * PAN_FACTOR;
       const panDy = (mid.y - p.lastMidY) * PAN_FACTOR;
       p.lastMidX  = mid.x;
       p.lastMidY  = mid.y;
 
-      // ─ New translation (scale-from-anchor + pan) ─────────────────────
+      // Translation: scale from anchor + pan offset
       const newTx = p.anchorX - (p.anchorX - p.startTx) * scaleRatio + panDx;
       const newTy = p.anchorY - (p.anchorY - p.startTy) * scaleRatio + panDy;
 
       applyZoom({ scale: newScale, tx: newTx, ty: newTy });
     };
 
-    /* ── touchend ─────────────────────────────────────────────────────── */
+    /* ── touchend / touchcancel ────────────────────────────────────────── */
     const onEnd = (e) => {
-      if (e.touches.length < 2) {
+      e.stopPropagation(); // always block react-pageflip
+
+      if (e.touches.length === 0) {
+        // All fingers lifted
+        dragRef.current.active  = false;
         pinchRef.current.active = false;
         isPinchingRef.current   = false;
-      }
-
-      if (blockFlipRef.current) {
-        e.stopPropagation();
-        const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
-        el.addEventListener("click",    swallow, { capture: true, once: true });
-        el.addEventListener("touchend", swallow, { capture: true, once: true });
-        setTimeout(() => { blockFlipRef.current = false; }, 450);
+      } else if (e.touches.length === 1) {
+        // One finger lifted from a 2-finger gesture → resume 1-finger drag
+        pinchRef.current.active = false;
+        isPinchingRef.current   = false;
+        dragRef.current = {
+          active: true,
+          lastX:  e.touches[0].clientX,
+          lastY:  e.touches[0].clientY,
+        };
       }
     };
 
-    el.addEventListener("touchstart", onStart, { capture: true, passive: false });
-    el.addEventListener("touchmove",  onMove,  { capture: true, passive: false });
-    el.addEventListener("touchend",   onEnd,   { capture: true, passive: false });
+    el.addEventListener("touchstart",  onStart, { capture: true, passive: false });
+    el.addEventListener("touchmove",   onMove,  { capture: true, passive: false });
+    el.addEventListener("touchend",    onEnd,   { capture: true, passive: false });
+    el.addEventListener("touchcancel", onEnd,   { capture: true, passive: false });
     return () => {
-      el.removeEventListener("touchstart", onStart, { capture: true });
-      el.removeEventListener("touchmove",  onMove,  { capture: true });
-      el.removeEventListener("touchend",   onEnd,   { capture: true });
+      el.removeEventListener("touchstart",  onStart, { capture: true });
+      el.removeEventListener("touchmove",   onMove,  { capture: true });
+      el.removeEventListener("touchend",    onEnd,   { capture: true });
+      el.removeEventListener("touchcancel", onEnd,   { capture: true });
     };
   }, [isMobile, applyZoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -269,12 +303,8 @@ export default function FlipBook({ images = [] }) {
         paddingBottom: 64,
         boxSizing: "border-box",
         animation: "fbSceneIn 0.9s cubic-bezier(0.16,1,0.3,1) both",
-        /*
-         * The outer container allows 1-finger vertical scroll (pan-y).
-         * The inner wrapRef div overrides to "none" so we can intercept
-         * pinch gestures in JS before the browser handles them.
-         */
-        touchAction: "pan-y",
+        // All touch is intercepted by the inner wrapRef; outer container needs none.
+        touchAction: "none",
       }}
     >
       <style>{`
@@ -295,7 +325,37 @@ export default function FlipBook({ images = [] }) {
           will-change: transform;
         }
         .stf__parent { background: transparent !important; }
-        .stf__parent * { cursor: pointer; }
+        /* Cursor default — clicks do nothing on book pages */
+        .stf__parent * { cursor: default; user-select: none; }
+        /* Arrow nav buttons */
+        .fb-arrow {
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.22);
+          color: #fff;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+          flex-shrink: 0;
+          position: relative;
+          overflow: hidden;
+        }
+        .fb-arrow:hover:not(:disabled) {
+          background: rgba(255,255,255,0.22);
+          border-color: rgba(255,255,255,0.45);
+          transform: scale(1.1);
+        }
+        .fb-arrow:active:not(:disabled) { transform: scale(0.93); }
+        .fb-arrow:disabled { opacity: 0.2; cursor: default; }
+        @media (max-width: 520px) {
+          .fb-arrow { width: 42px; height: 42px; }
+        }
 
         .fb-controls {
           position: fixed;
@@ -427,9 +487,9 @@ export default function FlipBook({ images = [] }) {
           usePortrait={isMobile}
           startPage={0}
           autoSize={true}
-          swipeDistance={50}
-          clickEventForward={true}
-          useMouseEvents={true}
+          swipeDistance={99999}         /* effectively disables swipe-to-flip */
+          clickEventForward={false}     /* no click-to-flip */
+          useMouseEvents={false}        /* no mouse drag-to-flip */
           style={{ margin: "0 auto" }}
           className="flipbook"
         >
@@ -443,25 +503,37 @@ export default function FlipBook({ images = [] }) {
 
       {/* Controls — fixed bottom bar */}
       <div className="fb-controls">
+        {/* ← Previous */}
         <button
-          className="fb-btn"
+          className="fb-arrow"
           onClick={() => bookRef.current?.pageFlip().flipPrev()}
           disabled={page === 0}
           aria-label="Previous page"
         >
-          ← Prev
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.4"
+            strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </button>
+
         <span className="fb-counter">
           {page === 0 ? "Cover" : `${page} – ${Math.min(page + 1, total)}`}
           &nbsp;/&nbsp;{total}
         </span>
+
+        {/* Next → */}
         <button
-          className="fb-btn"
+          className="fb-arrow"
           onClick={() => bookRef.current?.pageFlip().flipNext()}
           disabled={page >= totalPages - 2}
           aria-label="Next page"
         >
-          Next →
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.4"
+            strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </button>
         <button
           className="fb-fs-btn"
