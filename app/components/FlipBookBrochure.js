@@ -52,10 +52,18 @@ export default function FlipBook({ images = [] }) {
   const wrapRef = useRef(null);
   const [page, setPage] = useState(0);
   const [isMobile, setIsMobile] = useState(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState({ scale: 1, tx: 0, ty: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef(null);
-  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1 });
+  const pinchRef = useRef({
+    active: false,
+    startDist: 0,
+    startScale: 1,
+    startTx: 0,
+    startTy: 0,
+    midX: 0,
+    midY: 0,
+  });
   const total = images.length;
 
   useEffect(() => {
@@ -73,11 +81,28 @@ export default function FlipBook({ images = [] }) {
 
   useEffect(() => {
     const onWheel = (e) => {
-      // Zoom on Ctrl+wheel (desktop) OR any wheel in fullscreen
       if (!e.ctrlKey && !document.fullscreenElement) return;
       e.preventDefault();
+      const el = wrapRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // cursor position relative to wrap element
+      const cx = e.clientX - rect.left - rect.width / 2;
+      const cy = e.clientY - rect.top - rect.height / 2;
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom((z) => Math.min(2.5, Math.max(0.5, +(z + delta).toFixed(2))));
+      setZoom((z) => {
+        const oldScale = z.scale;
+        const newScale = Math.min(
+          2.5,
+          Math.max(0.5, +(oldScale + delta).toFixed(2)),
+        );
+        const ratio = newScale / oldScale;
+        return {
+          scale: newScale,
+          tx: cx - (cx - z.tx) * ratio,
+          ty: cy - (cy - z.ty) * ratio,
+        };
+      });
     };
     const el = wrapRef.current;
     el?.addEventListener("wheel", onWheel, { passive: false });
@@ -96,12 +121,26 @@ export default function FlipBook({ images = [] }) {
 
   const onTouchStart = (e) => {
     if (e.touches.length === 2) {
+      const el = wrapRef.current;
+      const rect = el?.getBoundingClientRect();
+      const midX =
+        (e.touches[0].clientX + e.touches[1].clientX) / 2 -
+        (rect?.left ?? 0) -
+        (rect?.width ?? 0) / 2;
+      const midY =
+        (e.touches[0].clientY + e.touches[1].clientY) / 2 -
+        (rect?.top ?? 0) -
+        (rect?.height ?? 0) / 2;
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       pinchRef.current = {
         active: true,
         startDist: Math.hypot(dx, dy),
-        startZoom: zoom,
+        startScale: zoom.scale,
+        startTx: zoom.tx,
+        startTy: zoom.ty,
+        midX,
+        midY,
       };
       e.preventDefault();
     }
@@ -113,11 +152,17 @@ export default function FlipBook({ images = [] }) {
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.hypot(dx, dy);
       const ratio = dist / pinchRef.current.startDist;
-      const next = Math.min(
+      const { startScale, startTx, startTy, midX, midY } = pinchRef.current;
+      const newScale = Math.min(
         2.5,
-        Math.max(0.5, +(pinchRef.current.startZoom * ratio).toFixed(2)),
+        Math.max(0.5, +(startScale * ratio).toFixed(2)),
       );
-      setZoom(next);
+      const scaleRatio = newScale / startScale;
+      setZoom({
+        scale: newScale,
+        tx: midX - (midX - startTx) * scaleRatio,
+        ty: midY - (midY - startTy) * scaleRatio,
+      });
       e.preventDefault();
     }
   };
@@ -262,8 +307,8 @@ export default function FlipBook({ images = [] }) {
       `}</style>
 
       {/* Zoom level indicator — shown when not at 100% */}
-      {zoom !== 1 && (
-        <div className="fb-zoom-indicator">{Math.round(zoom * 100)}%</div>
+      {zoom.scale !== 1 && (
+        <div className="fb-zoom-indicator">{Math.round(zoom.scale * 100)}%</div>
       )}
 
       {/* Book wrapper — responsive */}
@@ -276,7 +321,7 @@ export default function FlipBook({ images = [] }) {
         style={{
           width: isMobile ? "96vw" : "78vw",
           height: isMobile ? "70vh" : "80vh",
-          transform: `scale(${isMobile ? zoom : 0.9 * zoom})`,
+          transform: `translate(${zoom.tx}px, ${zoom.ty}px) scale(${isMobile ? zoom.scale : 0.9 * zoom.scale})`,
           transformOrigin: "center center",
           touchAction: "none",
         }}
