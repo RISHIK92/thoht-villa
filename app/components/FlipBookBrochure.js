@@ -1,10 +1,10 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import HTMLFlipBook from "react-pageflip";
 import Image from "next/image";
 
 /* ── One page panel ─────────────────────────────────────────────────────── */
-function Page({ src, number, total, side }) {
+function Page({ src, number }) {
   return (
     <div
       style={{
@@ -30,7 +30,6 @@ function Page({ src, number, total, side }) {
           draggable={false}
         />
       ) : (
-        /* blank back-cover */
         <div
           style={{
             width: "100%",
@@ -48,20 +47,36 @@ function Page({ src, number, total, side }) {
 export default function FlipBook({ images = [] }) {
   if (!images.length) return null;
 
-  const bookRef = useRef(null);
-  const wrapRef = useRef(null);
+  const bookRef      = useRef(null);
+  const wrapRef      = useRef(null);
   const containerRef = useRef(null);
 
-  const [page, setPage] = useState(0);
-  const [isMobile, setIsMobile] = useState(null);
+  const [page, setPage]           = useState(0);
+  const [isMobile, setIsMobile]   = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom] = useState({ scale: 1, tx: 0, ty: 0 });
+  const [zoom, setZoom]           = useState({ scale: 1, tx: 0, ty: 0 });
 
-  const pinchRef = useRef({ active: false, dist: 0, mid: { x: 0, y: 0 }, start: { scale: 1, tx: 0, ty: 0 } });
-  const blockFlip = useRef(false);
+  /*
+   * zoomRef — synchronous mirror of zoom state. Touch handlers MUST read from
+   * this ref so they always see the latest value without waiting for re-render.
+   */
+  const zoomRef      = useRef({ scale: 1, tx: 0, ty: 0 });
+  const pinchRef     = useRef({ active: false });
+  const blockFlipRef = useRef(false);
+  const isPinchingRef = useRef(false);   // true while ≥2 fingers are down
 
-  const total = images.length;
+  const total      = images.length;
+  const pages      = [...images];
+  if (pages.length % 2 !== 0) pages.push(null);
+  const totalPages = pages.length;
 
+  /* Keep zoomRef in sync with state (state change → ref update before next render) */
+  const applyZoom = useCallback((nz) => {
+    zoomRef.current = nz;
+    setZoom({ ...nz });
+  }, []);
+
+  /* ── Responsive breakpoint ────────────────────────────────────────────── */
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -69,63 +84,166 @@ export default function FlipBook({ images = [] }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  /* ── Fullscreen listener ─────────────────────────────────────────────── */
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
+  /* ── Ctrl+wheel / fullscreen-wheel zoom (desktop) ────────────────────── */
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
 
-    const getMid = (touches) => ({
-      x: (touches[0].clientX + touches[1].clientX) / 2,
-      y: (touches[0].clientY + touches[1].clientY) / 2,
+    const onWheel = (e) => {
+      if (!e.ctrlKey && !document.fullscreenElement) return;
+      e.preventDefault();
+      const rect  = el.getBoundingClientRect();
+      const cx    = e.clientX - rect.left  - rect.width  / 2;
+      const cy    = e.clientY - rect.top   - rect.height / 2;
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      const { scale: s0, tx, ty } = zoomRef.current;
+      const s = Math.min(4, Math.max(0.5, +(s0 + delta).toFixed(2)));
+      const r = s / s0;
+      applyZoom({ scale: s, tx: cx - (cx - tx) * r, ty: cy - (cy - ty) * r });
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [isMobile, applyZoom]);
+
+  /* ── Touch: pinch-zoom + 2-finger pan  ───────────────────────────────── *
+   *
+   * DESIGN:
+   *   1 finger  → do nothing (native page scroll + react-pageflip flip work)
+   *   2 fingers → intercept in capture phase, scale + pan canvas
+   *
+   * MATH (pinch-zoom from arbitrary anchor):
+   *   When two fingers are placed, record:
+   *     • anchorCanvas  = midpoint converted to canvas (element-relative) coords
+   *     • startScale, startTx, startTy from zoomRef
+   *     • startDist     = finger distance
+   *     • lastScreenMid = screen midpoint (for 2-finger pan delta)
+   *
+   *   Each move frame:
+   *     newScale = clamp(startScale * (currentDist / startDist))
+   *     scaleRatio = newScale / startScale
+   *     // Scale from anchor: the anchor point stays fixed in canvas space
+   *     newTx = anchorCanvas.x - (anchorCanvas.x - startTx) * scaleRatio
+   *     // Add pan: midpoint moved Δscreen → canvas is not scaled by css yet,
+   *     // so Δcanvas = Δscreen (since we apply transform externally)
+   *     newTx += (currentScreenMid.x - lastScreenMid.x) * PAN_FACTOR
+   *     newTy = same
+   *
+   *   PAN_FACTOR < 1 → feels slower, more controlled (0.45 is a good value)
+   *   Lerp on scale (factor 0.25) → prevents jittery zoom jumps
+   * ─────────────────────────────────────────────────────────────────────── */
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const PAN_FACTOR  = 0.45;   // 2-finger pan damping  (0..1, lower = slower)
+    const LERP_SCALE  = 0.28;   // zoom damping per frame (0..1, lower = slower)
+
+    const getMid = (t) => ({
+      x: (t[0].clientX + t[1].clientX) / 2,
+      y: (t[0].clientY + t[1].clientY) / 2,
     });
+    const getDist = (t) =>
+      Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
 
-    const getDist = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+    /* ── touchstart ───────────────────────────────────────────────────── */
+    const onStart = (e) => {
+      if (e.touches.length < 2) return;  // 1-finger → ignore
 
-    const onTouchStart = (e) => {
-      if (e.touches.length === 2) {
-        const dist = getDist(e.touches);
-        const mid = getMid(e.touches);
-        pinchRef.current = { active: true, dist, mid, start: { ...zoom } };
+      // Prevent browser native pinch-zoom AND page scroll during pinch
+      e.preventDefault();
+      e.stopPropagation();
+
+      const t    = e.touches;
+      const mid  = getMid(t);
+      const d    = getDist(t);
+      const rect = el.getBoundingClientRect();
+      const { scale, tx, ty } = zoomRef.current;
+
+      // Canvas-space anchor = screen mid → element-local, from element center
+      const anchorX = mid.x - rect.left - rect.width  / 2;
+      const anchorY = mid.y - rect.top  - rect.height / 2;
+
+      pinchRef.current = {
+        active:      true,
+        startDist:   d,
+        startScale:  scale,
+        startTx:     tx,
+        startTy:     ty,
+        anchorX,
+        anchorY,
+        lastMidX:    mid.x,
+        lastMidY:    mid.y,
+      };
+      isPinchingRef.current  = true;
+      blockFlipRef.current   = true;
+    };
+
+    /* ── touchmove ────────────────────────────────────────────────────── */
+    const onMove = (e) => {
+      if (!isPinchingRef.current || e.touches.length < 2) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const t   = e.touches;
+      const p   = pinchRef.current;
+      const mid = getMid(t);
+      const d   = getDist(t);
+
+      // ─ Scale (lerped) ────────────────────────────────────────────────
+      const targetScale = p.startScale * (d / p.startDist);
+      const prevScale   = zoomRef.current.scale;
+      const newScale    = Math.min(4, Math.max(0.5,
+        prevScale + (targetScale - prevScale) * LERP_SCALE,
+      ));
+      const scaleRatio  = newScale / p.startScale;
+
+      // ─ Pan delta (damped) ────────────────────────────────────────────
+      const panDx = (mid.x - p.lastMidX) * PAN_FACTOR;
+      const panDy = (mid.y - p.lastMidY) * PAN_FACTOR;
+      p.lastMidX  = mid.x;
+      p.lastMidY  = mid.y;
+
+      // ─ New translation (scale-from-anchor + pan) ─────────────────────
+      const newTx = p.anchorX - (p.anchorX - p.startTx) * scaleRatio + panDx;
+      const newTy = p.anchorY - (p.anchorY - p.startTy) * scaleRatio + panDy;
+
+      applyZoom({ scale: newScale, tx: newTx, ty: newTy });
+    };
+
+    /* ── touchend ─────────────────────────────────────────────────────── */
+    const onEnd = (e) => {
+      if (e.touches.length < 2) {
+        pinchRef.current.active = false;
+        isPinchingRef.current   = false;
+      }
+
+      if (blockFlipRef.current) {
+        e.stopPropagation();
+        const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+        el.addEventListener("click",    swallow, { capture: true, once: true });
+        el.addEventListener("touchend", swallow, { capture: true, once: true });
+        setTimeout(() => { blockFlipRef.current = false; }, 450);
       }
     };
 
-    const onTouchMove = (e) => {
-      if (e.touches.length === 2 && pinchRef.current.active) {
-        e.preventDefault();
-        const dist = getDist(e.touches);
-        const mid = getMid(e.touches);
-        const p = pinchRef.current;
-        
-        const scale = Math.min(3, Math.max(1, p.start.scale * (dist / p.dist)));
-        const dx = (mid.x - p.mid.x);
-        const dy = (mid.y - p.mid.y);
-        
-        setZoom({ scale, tx: p.start.tx + dx, ty: p.start.ty + dy });
-        if (Math.abs(dist - p.dist) > 5) blockFlip.current = true;
-      }
-    };
-
-    const onTouchEnd = () => {
-      pinchRef.current.active = false;
-      if (blockFlip.current) {
-        setTimeout(() => { blockFlip.current = false; }, 100);
-      }
-    };
-
-    el.addEventListener("touchstart", onTouchStart);
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    el.addEventListener("touchend", onTouchEnd);
+    el.addEventListener("touchstart", onStart, { capture: true, passive: false });
+    el.addEventListener("touchmove",  onMove,  { capture: true, passive: false });
+    el.addEventListener("touchend",   onEnd,   { capture: true, passive: false });
     return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchstart", onStart, { capture: true });
+      el.removeEventListener("touchmove",  onMove,  { capture: true });
+      el.removeEventListener("touchend",   onEnd,   { capture: true });
     };
-  }, [zoom]);
+  }, [isMobile, applyZoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
@@ -135,10 +253,6 @@ export default function FlipBook({ images = [] }) {
   const onFlip = (e) => setPage(e.data);
 
   if (isMobile === null) return null;
-
-  const pages = [...images];
-  if (pages.length % 2 !== 0) pages.push(null);
-  const totalPages = pages.length;
 
   return (
     <div
@@ -155,6 +269,12 @@ export default function FlipBook({ images = [] }) {
         paddingBottom: 64,
         boxSizing: "border-box",
         animation: "fbSceneIn 0.9s cubic-bezier(0.16,1,0.3,1) both",
+        /*
+         * The outer container allows 1-finger vertical scroll (pan-y).
+         * The inner wrapRef div overrides to "none" so we can intercept
+         * pinch gestures in JS before the browser handles them.
+         */
+        touchAction: "pan-y",
       }}
     >
       <style>{`
@@ -168,10 +288,15 @@ export default function FlipBook({ images = [] }) {
           align-items: center;
           justify-content: center;
           overflow: visible;
-          touch-action: pan-y;
+          /* "none" here lets our capture-phase JS handlers preventDefault()
+             on 2-finger gestures while the outer container still passes
+             1-finger scroll to the browser. */
+          touch-action: none;
+          will-change: transform;
         }
         .stf__parent { background: transparent !important; }
         .stf__parent * { cursor: pointer; }
+
         .fb-controls {
           position: fixed;
           bottom: 0; left: 0; right: 0;
@@ -264,19 +389,25 @@ export default function FlipBook({ images = [] }) {
         }
       `}</style>
 
+      {/* Zoom level pill — shown when not at 100% */}
       {zoom.scale !== 1 && (
         <div className="fb-zoom-pill">{Math.round(zoom.scale * 100)}%</div>
       )}
 
+      {/* Book wrapper */}
       <div
         ref={wrapRef}
         className="fb-wrap"
         style={{
-          width: isMobile ? "96vw" : "78vw",
+          width:  isMobile ? "96vw" : "78vw",
           height: isMobile ? "70vh" : "80vh",
-          transform: `translate(${zoom.tx}px,${zoom.ty}px) scale(${zoom.scale})`,
-          transition: pinchRef.current.active ? "none" : "transform 0.2s ease-out",
+          transform: `translate(${zoom.tx}px,${zoom.ty}px) scale(${isMobile ? zoom.scale : 0.9 * zoom.scale})`,
           transformOrigin: "center center",
+          /*
+           * transition: "none" while pinching keeps the canvas glued to fingers.
+           * After releasing, ease-out gives a smooth settle animation.
+           */
+          transition: isPinchingRef.current ? "none" : "transform 0.18s ease-out",
         }}
       >
         <HTMLFlipBook
@@ -304,21 +435,17 @@ export default function FlipBook({ images = [] }) {
         >
           {pages.map((src, idx) => (
             <div key={idx}>
-              <Page
-                src={src}
-                number={src ? idx + 1 : null}
-                total={total}
-                side={idx % 2 === 0 ? "right" : "left"}
-              />
+              <Page src={src} number={src ? idx + 1 : null} />
             </div>
           ))}
         </HTMLFlipBook>
       </div>
 
+      {/* Controls — fixed bottom bar */}
       <div className="fb-controls">
         <button
           className="fb-btn"
-          onClick={() => !blockFlip.current && bookRef.current?.pageFlip().flipPrev()}
+          onClick={() => bookRef.current?.pageFlip().flipPrev()}
           disabled={page === 0}
           aria-label="Previous page"
         >
@@ -330,7 +457,7 @@ export default function FlipBook({ images = [] }) {
         </span>
         <button
           className="fb-btn"
-          onClick={() => !blockFlip.current && bookRef.current?.pageFlip().flipNext()}
+          onClick={() => bookRef.current?.pageFlip().flipNext()}
           disabled={page >= totalPages - 2}
           aria-label="Next page"
         >
@@ -343,29 +470,15 @@ export default function FlipBook({ images = [] }) {
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
           {isFullscreen ? (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
             </svg>
           ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
           )}
