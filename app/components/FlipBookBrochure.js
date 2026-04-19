@@ -53,6 +53,8 @@ export default function FlipBook({ images = [] }) {
   const [page, setPage] = useState(0);
   const [isMobile, setIsMobile] = useState(null);
   const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
   const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1 });
   const total = images.length;
 
@@ -62,6 +64,33 @@ export default function FlipBook({ images = [] }) {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  useEffect(() => {
+    const onWheel = (e) => {
+      // Zoom on Ctrl+wheel (desktop) OR any wheel in fullscreen
+      if (!e.ctrlKey && !document.fullscreenElement) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom((z) => Math.min(2.5, Math.max(0.5, +(z + delta).toFixed(2))));
+    };
+    const el = wrapRef.current;
+    el?.addEventListener("wheel", onWheel, { passive: false });
+    return () => el?.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const onFlip = (e) => setPage(e.data);
 
@@ -107,6 +136,7 @@ export default function FlipBook({ images = [] }) {
 
   return (
     <div
+      ref={containerRef}
       style={{
         width: "100vw",
         minHeight: "100vh",
@@ -115,7 +145,7 @@ export default function FlipBook({ images = [] }) {
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        paddingTop: 40,
+        paddingTop: 0,
         paddingBottom: 64,
         boxSizing: "border-box",
         animation: "fbSceneIn 0.9s cubic-bezier(0.16,1,0.3,1) both",
@@ -187,6 +217,39 @@ export default function FlipBook({ images = [] }) {
           letter-spacing: 0.06em;
           font-variant-numeric: tabular-nums;
         }
+        .fb-fs-btn {
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.22);
+          color: #fff;
+          width: 38px;
+          height: 38px;
+          border-radius: 8px;
+          font-size: 16px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+        .fb-fs-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.08); }
+        .fb-fs-btn:active { transform: scale(0.95); }
+        .fb-zoom-indicator {
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          background: rgba(0,0,0,0.55);
+          color: rgba(255,255,255,0.8);
+          font-size: 12px;
+          padding: 4px 10px;
+          border-radius: 20px;
+          letter-spacing: 0.05em;
+          pointer-events: none;
+          z-index: 1000;
+          transition: opacity 0.4s ease;
+        }
         @media (max-width: 768px) {
           .fb-btn { padding: 9px 20px; font-size: 12px; border-radius: 7px; }
           .fb-controls { gap: 12px; padding: 10px 12px; }
@@ -197,6 +260,11 @@ export default function FlipBook({ images = [] }) {
           .fb-controls { gap: 8px; }
         }
       `}</style>
+
+      {/* Zoom level indicator — shown when not at 100% */}
+      {zoom !== 1 && (
+        <div className="fb-zoom-indicator">{Math.round(zoom * 100)}%</div>
+      )}
 
       {/* Book wrapper — responsive */}
       <div
@@ -270,6 +338,40 @@ export default function FlipBook({ images = [] }) {
           aria-label="Next page"
         >
           Next →
+        </button>
+        <button
+          className="fb-fs-btn"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+            </svg>
+          ) : (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          )}
         </button>
       </div>
     </div>
