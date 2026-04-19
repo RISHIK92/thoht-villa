@@ -50,7 +50,7 @@ export default function FlipBook({ images = [] }) {
 
   const bookRef = useRef(null);
   const [page, setPage] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(null); // null = not yet mounted
   const total = images.length;
 
   useEffect(() => {
@@ -61,6 +61,9 @@ export default function FlipBook({ images = [] }) {
   }, []);
 
   const onFlip = (e) => setPage(e.data);
+
+  // Don't render until we know the viewport size (avoids SSR mismatch)
+  if (isMobile === null) return null;
 
   const pages = [...images];
   if (pages.length % 2 !== 0) pages.push(null); // blank last page
@@ -171,6 +174,7 @@ export default function FlipBook({ images = [] }) {
         }}
       >
         <HTMLFlipBook
+          key={isMobile ? "mobile" : "desktop"}
           ref={bookRef}
           width={isMobile ? 340 : 620}
           height={isMobile ? 480 : 840}
@@ -182,7 +186,7 @@ export default function FlipBook({ images = [] }) {
           showCover={true}
           mobileScrollSupport={true}
           onFlip={onFlip}
-          flippingTime={1100}
+          flippingTime={isMobile ? 1600 : 1100}
           usePortrait={isMobile}
           startPage={0}
           autoSize={true}
