@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import HTMLFlipBook from "react-pageflip";
 import Image from "next/image";
 
@@ -50,7 +50,15 @@ export default function FlipBook({ images = [] }) {
 
   const bookRef = useRef(null);
   const [page, setPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const total = images.length;
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const onFlip = (e) => setPage(e.data);
 
@@ -136,43 +144,49 @@ export default function FlipBook({ images = [] }) {
         .fb-counter {
           font-size: 12px;
           color: rgba(255,255,255,0.5);
-          min-width: 110px;
+          min-width: 80px;
           text-align: center;
           letter-spacing: 0.06em;
           font-variant-numeric: tabular-nums;
         }
+        @media (max-width: 768px) {
+          .fb-btn { padding: 9px 20px; font-size: 12px; border-radius: 7px; }
+          .fb-controls { gap: 12px; padding: 10px 12px; }
+          .fb-counter { min-width: 60px; font-size: 11px; }
+        }
         @media (max-width: 520px) {
-          .fb-btn { padding: 8px 18px; font-size: 11px; border-radius: 6px; }
+          .fb-btn { padding: 8px 14px; font-size: 11px; border-radius: 6px; }
+          .fb-controls { gap: 8px; }
         }
       `}</style>
 
-      {/* Book — 80% wide, 75% tall, centred with room for controls */}
+      {/* Book wrapper — responsive */}
       <div
         className="fb-wrap"
         style={{
-          width: "78vw",
-          height: "80vh",
-          transform: "scale(0.9)",
+          width: isMobile ? "96vw" : "78vw",
+          height: isMobile ? "70vh" : "80vh",
+          transform: isMobile ? "none" : "scale(0.9)",
           transformOrigin: "center center",
         }}
       >
         <HTMLFlipBook
           ref={bookRef}
-          width={620}
-          height={840}
+          width={isMobile ? 340 : 620}
+          height={isMobile ? 480 : 840}
           size="stretch"
-          minWidth={300}
-          maxWidth={1400}
-          minHeight={600}
-          maxHeight={1100}
+          minWidth={isMobile ? 160 : 300}
+          maxWidth={isMobile ? 480 : 1400}
+          minHeight={isMobile ? 300 : 600}
+          maxHeight={isMobile ? 700 : 1100}
           showCover={true}
           mobileScrollSupport={true}
           onFlip={onFlip}
           flippingTime={1100}
-          usePortrait={false}
+          usePortrait={isMobile}
           startPage={0}
           autoSize={true}
-          swipeDistance={30}
+          swipeDistance={20}
           clickEventForward={true}
           useMouseEvents={true}
           style={{ margin: "0 auto" }}
