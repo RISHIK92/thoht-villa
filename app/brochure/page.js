@@ -17,8 +17,7 @@ export default function BrochurePage() {
       style={{
         minHeight: "100vh",
         width: "100vw",
-        background:
-          "linear-gradient(135deg, #0d1117 0%, #1a2436 60%, #0d1117 100%)",
+        background: "#808080",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

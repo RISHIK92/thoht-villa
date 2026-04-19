@@ -20,7 +20,7 @@ function Page({ src, number, total, side }) {
           src={src}
           alt={`Page ${number}`}
           fill
-          sizes="(max-width:520px) 48vw, 430px"
+          sizes="(max-width:520px) 48 vw, 430px"
           priority={number <= 2}
           loading={number <= 2 ? "eager" : "lazy"}
           style={{ objectFit: "cover" }}
@@ -37,22 +37,6 @@ function Page({ src, number, total, side }) {
           }}
         />
       )}
-
-      {/* page number badge */}
-      <span
-        style={{
-          position: "absolute",
-          bottom: 10,
-          ...(side === "left" ? { left: 14 } : { right: 14 }),
-          fontSize: 11,
-          color: "rgba(255,255,255,0.35)",
-          letterSpacing: "0.06em",
-          fontVariantNumeric: "tabular-nums",
-          pointerEvents: "none",
-        }}
-      >
-        {number} / {total}
-      </span>
     </div>
   );
 }
