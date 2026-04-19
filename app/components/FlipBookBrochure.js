@@ -50,24 +50,24 @@ export default function FlipBook({ images = [] }) {
 
   const bookRef = useRef(null);
   const wrapRef = useRef(null);
+  const containerRef = useRef(null);
+
   const [page, setPage] = useState(0);
   const [isMobile, setIsMobile] = useState(null);
-  const [zoom, setZoom] = useState({ scale: 1, tx: 0, ty: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef(null);
-  const pinchRef = useRef({
-    active: false,
-    startDist: 0,
-    startScale: 1,
-    startTx: 0,
-    startTy: 0,
-    midX: 0, // world midpoint at gesture start
-    midY: 0,
-    lastMidX: 0, // for pan tracking
-    lastMidY: 0,
-  });
-  const wasPinchingRef = useRef(false);
+  const [zoom, setZoom] = useState({ scale: 1, tx: 0, ty: 0 });
+
+  // Mirror of zoom for synchronous access inside touch handlers
+  const zoomRef = useRef({ scale: 1, tx: 0, ty: 0 });
+  const pinchRef = useRef({ active: false });
+  const blockFlip = useRef(false);
+
   const total = images.length;
+
+  // Keep zoomRef in sync whenever zoom state changes
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -82,135 +82,115 @@ export default function FlipBook({ images = [] }) {
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
+  // Wheel zoom (Ctrl+scroll or any scroll in fullscreen)
   useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
     const onWheel = (e) => {
       if (!e.ctrlKey && !document.fullscreenElement) return;
       e.preventDefault();
-      const el = wrapRef.current;
-      if (!el) return;
       const rect = el.getBoundingClientRect();
-      // cursor position relative to wrap element
       const cx = e.clientX - rect.left - rect.width / 2;
       const cy = e.clientY - rect.top - rect.height / 2;
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
       setZoom((z) => {
-        const oldScale = z.scale;
-        const newScale = Math.min(
-          2.5,
-          Math.max(0.5, +(oldScale + delta).toFixed(2)),
-        );
-        const ratio = newScale / oldScale;
-        return {
-          scale: newScale,
-          tx: cx - (cx - z.tx) * ratio,
-          ty: cy - (cy - z.ty) * ratio,
+        const s = Math.min(3, Math.max(0.4, +(z.scale + delta).toFixed(2)));
+        const r = s / z.scale;
+        const nz = {
+          scale: s,
+          tx: cx - (cx - z.tx) * r,
+          ty: cy - (cy - z.ty) * r,
         };
+        zoomRef.current = nz;
+        return nz;
       });
     };
-    const el = wrapRef.current;
-    el?.addEventListener("wheel", onWheel, { passive: false });
-    return () => el?.removeEventListener("wheel", onWheel);
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  // Register capture-phase touch listeners so react-pageflip never sees 2-finger gestures
+  // Capture-phase touch handlers — intercept BEFORE react-pageflip sees them
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
 
-    const getMid = (touches) => {
-      const rect = el.getBoundingClientRect();
-      return {
-        x:
-          (touches[0].clientX + touches[1].clientX) / 2 -
-          rect.left -
-          rect.width / 2,
-        y:
-          (touches[0].clientY + touches[1].clientY) / 2 -
-          rect.top -
-          rect.height / 2,
-      };
-    };
-
     const onStart = (e) => {
       if (e.touches.length < 2) return;
+      // Block react-pageflip from seeing this gesture
       e.stopPropagation();
       e.preventDefault();
-      wasPinchingRef.current = true;
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const mid = getMid(e.touches);
+
+      const t0 = e.touches[0],
+        t1 = e.touches[1];
+      const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+      const rect = el.getBoundingClientRect();
+      const midX = (t0.clientX + t1.clientX) / 2 - rect.left - rect.width / 2;
+      const midY = (t0.clientY + t1.clientY) / 2 - rect.top - rect.height / 2;
+
+      // Read zoom state synchronously from ref — no async setZoom needed
+      const { scale, tx, ty } = zoomRef.current;
       pinchRef.current = {
         active: true,
-        startDist: Math.hypot(dx, dy),
-        startScale: 0, // filled from state snapshot below
-        startTx: 0,
-        startTy: 0,
-        midX: mid.x,
-        midY: mid.y,
-        lastMidX: mid.x,
-        lastMidY: mid.y,
+        startDist: dist,
+        startScale: scale,
+        startTx: tx,
+        startTy: ty,
+        originX: midX,
+        originY: midY,
+        lastMidX: midX,
+        lastMidY: midY,
       };
-      // capture current zoom state into pinchRef
-      setZoom((z) => {
-        pinchRef.current.startScale = z.scale;
-        pinchRef.current.startTx = z.tx;
-        pinchRef.current.startTy = z.ty;
-        return z; // no change
-      });
+      blockFlip.current = true;
     };
 
     const onMove = (e) => {
-      if (!pinchRef.current.active || e.touches.length < 2) return;
+      const p = pinchRef.current;
+      if (!p.active || e.touches.length < 2) return;
       e.stopPropagation();
       e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      const mid = getMid(e.touches);
-      const {
-        startDist,
-        startScale,
-        startTx,
-        startTy,
-        midX,
-        midY,
-        lastMidX,
-        lastMidY,
-      } = pinchRef.current;
+
+      const t0 = e.touches[0],
+        t1 = e.touches[1];
+      const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+      const rect = el.getBoundingClientRect();
+      const midX = (t0.clientX + t1.clientX) / 2 - rect.left - rect.width / 2;
+      const midY = (t0.clientY + t1.clientY) / 2 - rect.top - rect.height / 2;
 
       const newScale = Math.min(
         3,
-        Math.max(0.5, +(startScale * (dist / startDist)).toFixed(3)),
+        Math.max(0.4, +(p.startScale * (dist / p.startDist)).toFixed(3)),
       );
-      const scaleRatio = newScale / startScale;
-      // zoom toward the initial pinch midpoint + follow any pan between frames
-      const panDx = mid.x - lastMidX;
-      const panDy = mid.y - lastMidY;
-      pinchRef.current.lastMidX = mid.x;
-      pinchRef.current.lastMidY = mid.y;
+      const sRatio = newScale / p.startScale;
+      const panDx = midX - p.lastMidX;
+      const panDy = midY - p.lastMidY;
+      p.lastMidX = midX;
+      p.lastMidY = midY;
 
-      setZoom({
+      const nz = {
         scale: newScale,
-        tx: midX - (midX - startTx) * scaleRatio + panDx,
-        ty: midY - (midY - startTy) * scaleRatio + panDy,
-      });
+        tx: p.originX - (p.originX - p.startTx) * sRatio + panDx,
+        ty: p.originY - (p.originY - p.startTy) * sRatio + panDy,
+      };
+      zoomRef.current = nz;
+      setZoom(nz);
     };
 
     const onEnd = (e) => {
       if (e.touches.length < 2) {
         pinchRef.current.active = false;
       }
-      if (wasPinchingRef.current) {
+      if (blockFlip.current) {
         e.stopPropagation();
-        // swallow the next click so react-pageflip can't flip
-        const blockClick = (ev) => {
+        // Swallow next click so react-pageflip can't flip
+        const blk = (ev) => {
           ev.stopPropagation();
           ev.preventDefault();
         };
-        el.addEventListener("click", blockClick, { capture: true, once: true });
+        el.addEventListener("click", blk, { capture: true, once: true });
+        el.addEventListener("touchend", blk, { capture: true, once: true });
         setTimeout(() => {
-          wasPinchingRef.current = false;
-        }, 400);
+          blockFlip.current = false;
+        }, 450);
       }
     };
 
@@ -227,25 +207,17 @@ export default function FlipBook({ images = [] }) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onFlip = (e) => setPage(e.data);
-  const onTouchStart = undefined;
-  const onTouchMove = undefined;
-  const onTouchEnd = undefined;
-
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
+    else document.exitFullscreen();
   };
 
-  // Don't render until we know the viewport size (avoids SSR mismatch)
+  const onFlip = (e) => setPage(e.data);
+
   if (isMobile === null) return null;
 
   const pages = [...images];
-  if (pages.length % 2 !== 0) pages.push(null); // blank last page
-
+  if (pages.length % 2 !== 0) pages.push(null);
   const totalPages = pages.length;
 
   return (
@@ -350,19 +322,18 @@ export default function FlipBook({ images = [] }) {
         }
         .fb-fs-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.08); }
         .fb-fs-btn:active { transform: scale(0.95); }
-        .fb-zoom-indicator {
+        .fb-zoom-pill {
           position: fixed;
           top: 16px;
           right: 16px;
           background: rgba(0,0,0,0.55);
-          color: rgba(255,255,255,0.8);
+          color: rgba(255,255,255,0.85);
           font-size: 12px;
-          padding: 4px 10px;
+          padding: 4px 12px;
           border-radius: 20px;
           letter-spacing: 0.05em;
           pointer-events: none;
           z-index: 1000;
-          transition: opacity 0.4s ease;
         }
         @media (max-width: 768px) {
           .fb-btn { padding: 9px 20px; font-size: 12px; border-radius: 7px; }
@@ -377,7 +348,7 @@ export default function FlipBook({ images = [] }) {
 
       {/* Zoom level indicator — shown when not at 100% */}
       {zoom.scale !== 1 && (
-        <div className="fb-zoom-indicator">{Math.round(zoom.scale * 100)}%</div>
+        <div className="fb-zoom-pill">{Math.round(zoom.scale * 100)}%</div>
       )}
 
       {/* Book wrapper — responsive */}
@@ -387,7 +358,7 @@ export default function FlipBook({ images = [] }) {
         style={{
           width: isMobile ? "96vw" : "78vw",
           height: isMobile ? "70vh" : "80vh",
-          transform: `translate(${zoom.tx}px, ${zoom.ty}px) scale(${isMobile ? zoom.scale : 0.9 * zoom.scale})`,
+          transform: `translate(${zoom.tx}px,${zoom.ty}px) scale(${isMobile ? zoom.scale : 0.9 * zoom.scale})`,
           transformOrigin: "center center",
           touchAction: "none",
         }}
@@ -403,13 +374,13 @@ export default function FlipBook({ images = [] }) {
           minHeight={isMobile ? 300 : 600}
           maxHeight={isMobile ? 700 : 1100}
           showCover={true}
-          mobileScrollSupport={true}
+          mobileScrollSupport={false}
           onFlip={onFlip}
           flippingTime={isMobile ? 1600 : 1100}
           usePortrait={isMobile}
           startPage={0}
           autoSize={true}
-          swipeDistance={20}
+          swipeDistance={50}
           clickEventForward={true}
           useMouseEvents={true}
           style={{ margin: "0 auto" }}
