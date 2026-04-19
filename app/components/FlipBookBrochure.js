@@ -20,9 +20,12 @@ function Page({ src, number, total, side }) {
           src={src}
           alt={`Page ${number}`}
           fill
-          sizes="(max-width:520px) 48 vw, 430px"
+          sizes="(max-width:520px) 48vw, 450px"
           priority={number <= 2}
           loading={number <= 2 ? "eager" : "lazy"}
+          quality={100}
+          unoptimized={true}
+          placeholder="empty"
           style={{ objectFit: "cover" }}
           draggable={false}
         />
