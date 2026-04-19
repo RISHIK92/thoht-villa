@@ -64,6 +64,7 @@ export default function FlipBook({ images = [] }) {
     midX: 0,
     midY: 0,
   });
+  const wasPinchingRef = useRef(false);
   const total = images.length;
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export default function FlipBook({ images = [] }) {
 
   const onTouchStart = (e) => {
     if (e.touches.length === 2) {
+      wasPinchingRef.current = true;
       const el = wrapRef.current;
       const rect = el?.getBoundingClientRect();
       const midX =
@@ -164,11 +166,32 @@ export default function FlipBook({ images = [] }) {
         ty: midY - (midY - startTy) * scaleRatio,
       });
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
   const onTouchEnd = (e) => {
-    if (e.touches.length < 2) pinchRef.current.active = false;
+    if (e.touches.length < 2) {
+      pinchRef.current.active = false;
+      if (wasPinchingRef.current) {
+        // block the imminent click/flip that react-pageflip fires on touch end
+        const block = (ev) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+        };
+        wrapRef.current?.addEventListener("click", block, {
+          capture: true,
+          once: true,
+        });
+        wrapRef.current?.addEventListener("touchend", block, {
+          capture: true,
+          once: true,
+        });
+        setTimeout(() => {
+          wasPinchingRef.current = false;
+        }, 300);
+      }
+    }
   };
 
   // Don't render until we know the viewport size (avoids SSR mismatch)
