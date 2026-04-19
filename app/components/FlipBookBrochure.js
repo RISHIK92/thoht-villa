@@ -148,20 +148,20 @@ export default function FlipBook({ images = [] }) {
         className="fb-wrap"
         style={{
           width: "78vw",
-          height: "70vh",
+          height: "80vh",
           transform: "scale(0.9)",
           transformOrigin: "center center",
         }}
       >
         <HTMLFlipBook
           ref={bookRef}
-          width={580}
-          height={760}
+          width={620}
+          height={840}
           size="stretch"
-          minWidth={220}
-          maxWidth={1200}
-          minHeight={260}
-          maxHeight={900}
+          minWidth={300}
+          maxWidth={1400}
+          minHeight={600}
+          maxHeight={1100}
           showCover={true}
           mobileScrollSupport={true}
           onFlip={onFlip}
