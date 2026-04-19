@@ -51,10 +51,11 @@ export default function FlipBook({ images = [] }) {
   const wrapRef      = useRef(null);
   const containerRef = useRef(null);
 
-  const [page, setPage]           = useState(0);
-  const [isMobile, setIsMobile]   = useState(null);
+  const [page, setPage]               = useState(0);
+  const [isMobile, setIsMobile]       = useState(null);
+  const [showSideArrows, setShowSideArrows] = useState(null); // true when ≤ 1024px
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [zoom, setZoom]           = useState({ scale: 1, tx: 0, ty: 0 });
+  const [zoom, setZoom]               = useState({ scale: 1, tx: 0, ty: 0 });
 
   /*
    * zoomRef — synchronous mirror of zoom state. Touch handlers MUST read from
@@ -76,9 +77,13 @@ export default function FlipBook({ images = [] }) {
     setZoom({ ...nz });
   }, []);
 
-  /* ── Responsive breakpoint ────────────────────────────────────────────── */
+  /* ── Responsive breakpoints ────────────────────────────────────────── */
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 768);
+      setShowSideArrows(w <= 1024); // side arrows for phone + tablet
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -286,7 +291,7 @@ export default function FlipBook({ images = [] }) {
 
   const onFlip = (e) => setPage(e.data);
 
-  if (isMobile === null) return null;
+  if (isMobile === null || showSideArrows === null) return null;
 
   return (
     <div
@@ -300,7 +305,7 @@ export default function FlipBook({ images = [] }) {
         justifyContent: "center",
         position: "relative",
         paddingTop: 0,
-        paddingBottom: 64,
+        paddingBottom: isMobile ? 56 : 64,
         boxSizing: "border-box",
         animation: "fbSceneIn 0.9s cubic-bezier(0.16,1,0.3,1) both",
         // All touch is intercepted by the inner wrapRef; outer container needs none.
@@ -327,7 +332,7 @@ export default function FlipBook({ images = [] }) {
         .stf__parent { background: transparent !important; }
         /* Cursor default — clicks do nothing on book pages */
         .stf__parent * { cursor: default; user-select: none; }
-        /* Arrow nav buttons */
+        /* ── Arrow nav buttons ────────────────────────────────────────────── */
         .fb-arrow {
           background: rgba(255,255,255,0.1);
           border: 1px solid rgba(255,255,255,0.22);
@@ -343,8 +348,8 @@ export default function FlipBook({ images = [] }) {
           -webkit-backdrop-filter: blur(12px);
           transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
           flex-shrink: 0;
-          position: relative;
           overflow: hidden;
+          -webkit-tap-highlight-color: transparent;
         }
         .fb-arrow:hover:not(:disabled) {
           background: rgba(255,255,255,0.22);
@@ -352,11 +357,9 @@ export default function FlipBook({ images = [] }) {
           transform: scale(1.1);
         }
         .fb-arrow:active:not(:disabled) { transform: scale(0.93); }
-        .fb-arrow:disabled { opacity: 0.2; cursor: default; }
-        @media (max-width: 520px) {
-          .fb-arrow { width: 42px; height: 42px; }
-        }
+        .fb-arrow:disabled { opacity: 0.18; cursor: default; }
 
+        /* ── Desktop bottom bar ─────────────────────────────────────────── */
         .fb-controls {
           position: fixed;
           bottom: 0; left: 0; right: 0;
@@ -367,6 +370,45 @@ export default function FlipBook({ images = [] }) {
           padding: 14px 20px;
           background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
           z-index: 999;
+        }
+
+        /* ── Mobile / tablet: arrows on sides, info at bottom ────────────── */
+        @media (max-width: 1024px) {
+          /* Left arrow — fixed, vertically centered */
+          .fb-arrow-left {
+            position: fixed;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+          }
+          .fb-arrow-left:active:not(:disabled) { transform: translateY(-50%) scale(0.93); }
+          .fb-arrow-left:hover:not(:disabled)  { transform: translateY(-50%) scale(1.1); }
+
+          /* Right arrow — fixed, vertically centered */
+          .fb-arrow-right {
+            position: fixed;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+          }
+          .fb-arrow-right:active:not(:disabled) { transform: translateY(-50%) scale(0.93); }
+          .fb-arrow-right:hover:not(:disabled)  { transform: translateY(-50%) scale(1.1); }
+
+          /* Bottom info strip (counter + fullscreen only) */
+          .fb-controls {
+            gap: 14px;
+            padding: 10px 16px;
+          }
+          /* Hide the arrows inside the bottom bar on mobile/tablet */
+          .fb-controls .fb-arrow { display: none; }
+        }
+
+        @media (max-width: 520px) {
+          .fb-arrow { width: 40px; height: 40px; }
+          .fb-arrow-left  { left: 6px; }
+          .fb-arrow-right { right: 6px; }
         }
         .fb-btn {
           background: rgba(255,255,255,0.1);
@@ -438,14 +480,8 @@ export default function FlipBook({ images = [] }) {
           pointer-events: none;
           z-index: 1000;
         }
-        @media (max-width: 768px) {
-          .fb-btn { padding: 9px 20px; font-size: 12px; border-radius: 7px; }
-          .fb-controls { gap: 12px; padding: 10px 12px; }
-          .fb-counter { min-width: 60px; font-size: 11px; }
-        }
-        @media (max-width: 520px) {
-          .fb-btn { padding: 8px 14px; font-size: 11px; border-radius: 6px; }
-          .fb-controls { gap: 8px; }
+        .fb-btn {
+          display: none; /* legacy class — unused */
         }
       `}</style>
 
@@ -501,40 +537,81 @@ export default function FlipBook({ images = [] }) {
         </HTMLFlipBook>
       </div>
 
-      {/* Controls — fixed bottom bar */}
+      {/* ─────────────────────────────────────────────────────────────── *
+       * Mobile / tablet (≤ 1024 px): arrows fixed to sides, centred vertically.
+       * Desktop (> 1024 px): arrows sit in the bottom control bar.
+       * The fb-arrow-left / fb-arrow-right classes only apply on small screens.
+       * On desktop the buttons have no positional class — flexbox does the work.
+       * ─────────────────────────────────────────────────────────────── */}
+
+      {/* Side arrows — mobile + tablet (≤ 1024px) */}
+      {showSideArrows && (
+        <>
+          <button
+            className="fb-arrow fb-arrow-left"
+            onClick={() => bookRef.current?.pageFlip().flipPrev()}
+            disabled={page === 0}
+            aria-label="Previous page"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.4"
+              strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            className="fb-arrow fb-arrow-right"
+            onClick={() => bookRef.current?.pageFlip().flipNext()}
+            disabled={page >= totalPages - 2}
+            aria-label="Next page"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.4"
+              strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* Bottom bar — arrows + counter + fullscreen on desktop; counter + fullscreen only on mobile */}
       <div className="fb-controls">
-        {/* ← Previous */}
-        <button
-          className="fb-arrow"
-          onClick={() => bookRef.current?.pageFlip().flipPrev()}
-          disabled={page === 0}
-          aria-label="Previous page"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.4"
-            strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+        {/* Desktop only (> 1024px): arrows inside the bottom bar */}
+        {!showSideArrows && (
+          <button
+            className="fb-arrow"
+            onClick={() => bookRef.current?.pageFlip().flipPrev()}
+            disabled={page === 0}
+            aria-label="Previous page"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.4"
+              strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        )}
 
         <span className="fb-counter">
           {page === 0 ? "Cover" : `${page} – ${Math.min(page + 1, total)}`}
           &nbsp;/&nbsp;{total}
         </span>
 
-        {/* Next → */}
-        <button
-          className="fb-arrow"
-          onClick={() => bookRef.current?.pageFlip().flipNext()}
-          disabled={page >= totalPages - 2}
-          aria-label="Next page"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.4"
-            strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
+        {!showSideArrows && (
+          <button
+            className="fb-arrow"
+            onClick={() => bookRef.current?.pageFlip().flipNext()}
+            disabled={page >= totalPages - 2}
+            aria-label="Next page"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.4"
+              strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
+
         <button
           className="fb-fs-btn"
           onClick={toggleFullscreen}
