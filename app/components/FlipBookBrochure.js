@@ -49,8 +49,11 @@ export default function FlipBook({ images = [] }) {
   if (!images.length) return null;
 
   const bookRef = useRef(null);
+  const wrapRef = useRef(null);
   const [page, setPage] = useState(0);
-  const [isMobile, setIsMobile] = useState(null); // null = not yet mounted
+  const [isMobile, setIsMobile] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const pinchRef = useRef({ active: false, startDist: 0, startZoom: 1 });
   const total = images.length;
 
   useEffect(() => {
@@ -61,6 +64,38 @@ export default function FlipBook({ images = [] }) {
   }, []);
 
   const onFlip = (e) => setPage(e.data);
+
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = {
+        active: true,
+        startDist: Math.hypot(dx, dy),
+        startZoom: zoom,
+      };
+      e.preventDefault();
+    }
+  };
+
+  const onTouchMove = (e) => {
+    if (pinchRef.current.active && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / pinchRef.current.startDist;
+      const next = Math.min(
+        2.5,
+        Math.max(0.5, +(pinchRef.current.startZoom * ratio).toFixed(2)),
+      );
+      setZoom(next);
+      e.preventDefault();
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    if (e.touches.length < 2) pinchRef.current.active = false;
+  };
 
   // Don't render until we know the viewport size (avoids SSR mismatch)
   if (isMobile === null) return null;
@@ -165,12 +200,17 @@ export default function FlipBook({ images = [] }) {
 
       {/* Book wrapper — responsive */}
       <div
+        ref={wrapRef}
         className="fb-wrap"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
         style={{
           width: isMobile ? "96vw" : "78vw",
           height: isMobile ? "70vh" : "80vh",
-          transform: isMobile ? "none" : "scale(0.9)",
+          transform: `scale(${isMobile ? zoom : 0.9 * zoom})`,
           transformOrigin: "center center",
+          touchAction: "none",
         }}
       >
         <HTMLFlipBook
