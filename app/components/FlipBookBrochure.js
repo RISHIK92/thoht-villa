@@ -107,7 +107,7 @@ export default function FlipBook({ images = [] }) {
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [isMobile]); // re-run once wrapRef is populated after isMobile resolves
 
   // Capture-phase touch handlers — intercept BEFORE react-pageflip sees them
   useEffect(() => {
@@ -205,7 +205,7 @@ export default function FlipBook({ images = [] }) {
       el.removeEventListener("touchmove", onMove, { capture: true });
       el.removeEventListener("touchend", onEnd, { capture: true });
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps — re-run once wrapRef is populated
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) containerRef.current?.requestFullscreen();
